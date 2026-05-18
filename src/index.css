@@ -1,0 +1,220 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Azure DevOps Dark Theme Tokens */
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --bg-elevated: #2d2d2d;
+    --bg-inset: #1b1b1b;
+    --bg-hover: #2a2d2e;
+    --bg-header: #000000;
+    --bg-sidebar: #333333;
+
+    --text-primary: rgba(255,255,255,0.95);
+    --text-secondary: rgba(255,255,255,0.70);
+    --text-muted: rgba(255,255,255,0.45);
+    --text-inverse: #1e1e1e;
+    --text-link: #4fc3f7;
+
+    --border-default: rgba(255,255,255,0.08);
+    --border-subtle: rgba(255,255,255,0.05);
+    --border-strong: rgba(255,255,255,0.14);
+
+    --azure-blue: #0078d4;
+    --azure-blue-hover: #106ebe;
+    --azure-blue-light: rgba(0,120,212,0.12);
+
+    --status-pass: #339933;
+    --status-fail: #e81123;
+    --status-blocked: #f2c811;
+    --status-skip: #8a8886;
+    --status-running: #0078d4;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 14px;
+  }
+
+  body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  #root {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* Azure DevOps-style scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.18);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.30);
+  }
+
+  ::selection {
+    background: rgba(0, 120, 212, 0.35);
+    color: white;
+  }
+}
+
+@layer components {
+  /* Azure DevOps Buttons */
+  .btn-primary {
+    @apply px-3 py-1.5 text-sm font-normal rounded-sm transition-colors duration-100;
+    background-color: var(--azure-blue);
+    color: white;
+    border: 1px solid var(--azure-blue);
+  }
+  .btn-primary:hover {
+    background-color: var(--azure-blue-hover);
+    border-color: var(--azure-blue-hover);
+  }
+  .btn-primary:active {
+    background-color: #005a9e;
+  }
+
+  .btn-secondary {
+    @apply bg-transparent px-3 py-1.5 rounded-sm font-normal text-sm transition-colors duration-100;
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-hover);
+    border-color: rgba(255,255,255,0.22);
+  }
+
+  .btn-ghost {
+    @apply bg-transparent px-2 py-1 rounded-sm text-sm transition-colors duration-100;
+    color: var(--text-secondary);
+  }
+  .btn-ghost:hover {
+    color: var(--text-primary);
+    background-color: var(--bg-hover);
+  }
+
+  /* Azure DevOps Inputs */
+  .input {
+    @apply px-2 py-1.5 text-sm rounded-sm outline-none transition-all duration-100;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-strong);
+    color: var(--text-primary);
+  }
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+  .input:focus {
+    border-color: var(--azure-blue);
+    box-shadow: 0 0 0 1px var(--azure-blue);
+  }
+
+  /* Azure DevOps Table Styles */
+  .table-header {
+    @apply text-xs font-semibold uppercase tracking-wide px-3 py-2;
+    background-color: var(--bg-elevated);
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  .table-row {
+    @apply transition-colors duration-75 cursor-pointer;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .table-row:hover {
+    background-color: var(--bg-hover);
+  }
+
+  .table-cell {
+    @apply px-3 py-2.5 text-sm;
+    color: var(--text-primary);
+  }
+
+  /* Azure DevOps ID link style */
+  .mono-id {
+    @apply font-mono text-xs;
+    color: var(--text-link);
+  }
+
+  /* Azure DevOps tab underline style */
+  .ado-tab {
+    @apply px-3 py-2 text-sm relative transition-colors duration-100;
+    color: var(--text-secondary);
+    border-bottom: 2px solid transparent;
+  }
+  .ado-tab:hover {
+    color: var(--text-primary);
+  }
+  .ado-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--azure-blue);
+    font-weight: 600;
+  }
+
+  /* Azure DevOps Card */
+  .card {
+    @apply rounded-sm transition-all duration-100;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-default);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+  }
+}
+
+@layer utilities {
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 2px;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .pulse-dot {
+    animation: pulse-dot 1.5s ease-in-out infinite;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.15s ease-out;
+  }
+}
