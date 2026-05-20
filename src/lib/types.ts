@@ -2,6 +2,10 @@
 // O2 QA Command Center — Type Definitions
 // ============================================================
 
+// ----- Theme -----
+
+export type ThemeId = 'oxygene' | 'light' | 'dark';
+
 // ----- Enums -----
 
 export type TestStatus = 'pass' | 'fail' | 'blocked' | 'skip' | 'not_run' | 'running';

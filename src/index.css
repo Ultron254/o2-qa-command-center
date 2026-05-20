@@ -1,37 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Azure DevOps Dark Theme Tokens */
-    --bg-primary: #1e1e1e;
-    --bg-secondary: #252526;
-    --bg-elevated: #2d2d2d;
-    --bg-inset: #1b1b1b;
-    --bg-hover: #2a2d2e;
-    --bg-header: #000000;
-    --bg-sidebar: #333333;
+  /* ================================================
+     OXYGENE THEME (default) - White bg, orange accent
+     ================================================ */
+  :root,
+  [data-theme="oxygene"] {
+    --surface-primary: 255 255 255;
+    --surface-secondary: 249 250 251;
+    --surface-elevated: 243 244 246;
+    --surface-inset: 243 244 246;
+    --surface-hover: 243 244 246;
+    --surface-header: 255 255 255;
+    --surface-sidebar: 249 250 251;
+    --surface-overlay: 0 0 0;
 
-    --text-primary: rgba(255,255,255,0.95);
-    --text-secondary: rgba(255,255,255,0.70);
-    --text-muted: rgba(255,255,255,0.45);
-    --text-inverse: #1e1e1e;
-    --text-link: #4fc3f7;
+    --content-primary: 17 24 39;
+    --content-secondary: 75 85 99;
+    --content-muted: 156 163 175;
+    --content-inverse: 255 255 255;
+    --content-link: 249 115 22;
 
-    --border-default: rgba(255,255,255,0.08);
-    --border-subtle: rgba(255,255,255,0.05);
-    --border-strong: rgba(255,255,255,0.14);
+    --line-default: 229 231 235;
+    --line-subtle: 243 244 246;
+    --line-strong: 209 213 219;
+    --line-focus: 249 115 22;
 
-    --azure-blue: #0078d4;
-    --azure-blue-hover: #106ebe;
-    --azure-blue-light: rgba(0,120,212,0.12);
+    --accent: 249 115 22;
+    --accent-hover: 234 88 12;
+    --accent-pressed: 194 65 12;
+    --accent-subtle: 255 237 213;
+    --accent-foreground: 255 255 255;
 
-    --status-pass: #339933;
-    --status-fail: #e81123;
-    --status-blocked: #f2c811;
-    --status-skip: #8a8886;
-    --status-running: #0078d4;
+    --shadow-color: 0 0 0;
+    --scrollbar-thumb: 209 213 219;
+    --scrollbar-thumb-hover: 156 163 175;
+  }
+
+  /* ================================================
+     LIGHT THEME - White bg, blue accent
+     ================================================ */
+  [data-theme="light"] {
+    --surface-primary: 255 255 255;
+    --surface-secondary: 248 250 252;
+    --surface-elevated: 241 245 249;
+    --surface-inset: 241 245 249;
+    --surface-hover: 241 245 249;
+    --surface-header: 255 255 255;
+    --surface-sidebar: 248 250 252;
+    --surface-overlay: 0 0 0;
+
+    --content-primary: 15 23 42;
+    --content-secondary: 71 85 105;
+    --content-muted: 148 163 184;
+    --content-inverse: 255 255 255;
+    --content-link: 37 99 235;
+
+    --line-default: 226 232 240;
+    --line-subtle: 241 245 249;
+    --line-strong: 203 213 225;
+    --line-focus: 59 130 246;
+
+    --accent: 59 130 246;
+    --accent-hover: 37 99 235;
+    --accent-pressed: 29 78 216;
+    --accent-subtle: 219 234 254;
+    --accent-foreground: 255 255 255;
+
+    --shadow-color: 0 0 0;
+    --scrollbar-thumb: 203 213 225;
+    --scrollbar-thumb-hover: 148 163 184;
+  }
+
+  /* ================================================
+     DARK THEME - Dark bg, blue accent
+     ================================================ */
+  [data-theme="dark"] {
+    --surface-primary: 24 24 27;
+    --surface-secondary: 39 39 42;
+    --surface-elevated: 52 52 56;
+    --surface-inset: 24 24 27;
+    --surface-hover: 52 52 56;
+    --surface-header: 9 9 11;
+    --surface-sidebar: 39 39 42;
+    --surface-overlay: 0 0 0;
+
+    --content-primary: 250 250 250;
+    --content-secondary: 161 161 170;
+    --content-muted: 113 113 122;
+    --content-inverse: 24 24 27;
+    --content-link: 96 165 250;
+
+    --line-default: 63 63 70;
+    --line-subtle: 39 39 42;
+    --line-strong: 82 82 91;
+    --line-focus: 59 130 246;
+
+    --accent: 59 130 246;
+    --accent-hover: 96 165 250;
+    --accent-pressed: 37 99 235;
+    --accent-subtle: 30 58 138;
+    --accent-foreground: 255 255 255;
+
+    --shadow-color: 0 0 0;
+    --scrollbar-thumb: 63 63 70;
+    --scrollbar-thumb-hover: 82 82 91;
   }
 
   * {
@@ -45,13 +122,14 @@
   }
 
   body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+    font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    background-color: rgb(var(--surface-primary));
+    color: rgb(var(--content-primary));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow: hidden;
     height: 100vh;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   #root {
@@ -59,10 +137,9 @@
     overflow: hidden;
   }
 
-  /* Azure DevOps-style scrollbar */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
@@ -70,151 +147,150 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.18);
-    border-radius: 4px;
+    background: rgb(var(--scrollbar-thumb));
+    border-radius: 3px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.30);
+    background: rgb(var(--scrollbar-thumb-hover));
   }
 
   ::selection {
-    background: rgba(0, 120, 212, 0.35);
-    color: white;
+    background: rgb(var(--accent) / 0.2);
+    color: rgb(var(--content-primary));
   }
 }
 
 @layer components {
-  /* Azure DevOps Buttons */
+  /* Buttons */
   .btn-primary {
-    @apply px-3 py-1.5 text-sm font-normal rounded-sm transition-colors duration-100;
-    background-color: var(--azure-blue);
-    color: white;
-    border: 1px solid var(--azure-blue);
+    @apply inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-all duration-150;
+    background-color: rgb(var(--accent));
+    color: rgb(var(--accent-foreground));
+    border: none;
+    box-shadow: 0 1px 2px rgb(var(--shadow-color) / 0.05);
   }
   .btn-primary:hover {
-    background-color: var(--azure-blue-hover);
-    border-color: var(--azure-blue-hover);
+    background-color: rgb(var(--accent-hover));
+    box-shadow: 0 2px 4px rgb(var(--shadow-color) / 0.1);
+    transform: translateY(-0.5px);
   }
   .btn-primary:active {
-    background-color: #005a9e;
+    background-color: rgb(var(--accent-pressed));
+    transform: translateY(0);
+    box-shadow: none;
   }
 
   .btn-secondary {
-    @apply bg-transparent px-3 py-1.5 rounded-sm font-normal text-sm transition-colors duration-100;
-    color: var(--text-primary);
-    border: 1px solid var(--border-strong);
+    @apply inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-md font-medium text-sm transition-all duration-150;
+    color: rgb(var(--content-primary));
+    background-color: rgb(var(--surface-primary));
+    border: 1px solid rgb(var(--line-default));
   }
   .btn-secondary:hover {
-    background-color: var(--bg-hover);
-    border-color: rgba(255,255,255,0.22);
+    background-color: rgb(var(--surface-hover));
+    border-color: rgb(var(--line-strong));
   }
 
   .btn-ghost {
-    @apply bg-transparent px-2 py-1 rounded-sm text-sm transition-colors duration-100;
-    color: var(--text-secondary);
+    @apply inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-all duration-150;
+    color: rgb(var(--content-secondary));
+    background: transparent;
+    border: none;
   }
   .btn-ghost:hover {
-    color: var(--text-primary);
-    background-color: var(--bg-hover);
+    color: rgb(var(--content-primary));
+    background-color: rgb(var(--surface-hover));
   }
 
-  /* Azure DevOps Inputs */
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-md transition-all duration-150;
+    background-color: #EF4444;
+    color: white;
+    border: none;
+  }
+  .btn-danger:hover {
+    background-color: #DC2626;
+  }
+
+  /* Inputs */
   .input {
-    @apply px-2 py-1.5 text-sm rounded-sm outline-none transition-all duration-100;
-    background: var(--bg-inset);
-    border: 1px solid var(--border-strong);
-    color: var(--text-primary);
+    @apply px-3 py-2 text-sm rounded-md outline-none transition-all duration-150;
+    background: rgb(var(--surface-primary));
+    border: 1px solid rgb(var(--line-default));
+    color: rgb(var(--content-primary));
   }
   .input::placeholder {
-    color: var(--text-muted);
+    color: rgb(var(--content-muted));
   }
   .input:focus {
-    border-color: var(--azure-blue);
-    box-shadow: 0 0 0 1px var(--azure-blue);
+    border-color: rgb(var(--accent));
+    box-shadow: 0 0 0 3px rgb(var(--accent) / 0.1);
   }
 
-  /* Azure DevOps Table Styles */
+  /* Tables */
   .table-header {
-    @apply text-xs font-semibold uppercase tracking-wide px-3 py-2;
-    background-color: var(--bg-elevated);
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-strong);
+    @apply text-xs font-semibold uppercase tracking-wider px-4 py-3;
+    background-color: rgb(var(--surface-secondary));
+    color: rgb(var(--content-secondary));
+    border-bottom: 1px solid rgb(var(--line-default));
   }
 
   .table-row {
-    @apply transition-colors duration-75 cursor-pointer;
-    border-bottom: 1px solid var(--border-subtle);
+    @apply transition-colors duration-100 cursor-pointer;
+    border-bottom: 1px solid rgb(var(--line-subtle));
   }
   .table-row:hover {
-    background-color: var(--bg-hover);
+    background-color: rgb(var(--surface-hover));
   }
 
   .table-cell {
-    @apply px-3 py-2.5 text-sm;
-    color: var(--text-primary);
+    @apply px-4 py-3 text-sm;
+    color: rgb(var(--content-primary));
   }
 
-  /* Azure DevOps ID link style */
+  /* ID links */
   .mono-id {
-    @apply font-mono text-xs;
-    color: var(--text-link);
+    @apply font-mono text-xs font-medium;
+    color: rgb(var(--accent));
   }
 
-  /* Azure DevOps tab underline style */
+  /* Tab underline */
   .ado-tab {
-    @apply px-3 py-2 text-sm relative transition-colors duration-100;
-    color: var(--text-secondary);
+    @apply px-3 py-2 text-sm relative transition-colors duration-150;
+    color: rgb(var(--content-secondary));
     border-bottom: 2px solid transparent;
   }
   .ado-tab:hover {
-    color: var(--text-primary);
+    color: rgb(var(--content-primary));
   }
   .ado-tab.active {
-    color: var(--text-primary);
-    border-bottom-color: var(--azure-blue);
+    color: rgb(var(--content-primary));
+    border-bottom-color: rgb(var(--accent));
     font-weight: 600;
   }
 
-  /* Azure DevOps Card */
+  /* Card */
   .card {
-    @apply rounded-sm transition-all duration-100;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-default);
+    @apply rounded-lg transition-all duration-150;
+    background: rgb(var(--surface-primary));
+    border: 1px solid rgb(var(--line-default));
+    box-shadow: 0 1px 2px rgb(var(--shadow-color) / 0.04);
   }
   .card:hover {
-    border-color: var(--border-strong);
-  }
-}
-
-@layer utilities {
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    box-shadow: 0 2px 8px rgb(var(--shadow-color) / 0.08);
   }
 
+  /* Skeleton loader */
   .skeleton {
-    background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+    background: linear-gradient(
+      90deg,
+      rgb(var(--surface-elevated)) 25%,
+      rgb(var(--surface-hover)) 50%,
+      rgb(var(--surface-elevated)) 75%
+    );
     background-size: 200% 100%;
     animation: shimmer 1.5s ease-in-out infinite;
-    border-radius: 2px;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-
-  .pulse-dot {
-    animation: pulse-dot 1.5s ease-in-out infinite;
-  }
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  .animate-fade-in {
-    animation: fade-in 0.15s ease-out;
+    border-radius: 4px;
   }
 }

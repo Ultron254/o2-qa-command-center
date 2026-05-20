@@ -23,19 +23,19 @@ export const CoverageMatrix: React.FC = () => {
     <div className="p-5 h-full overflow-y-auto animate-fade-in">
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <Grid3X3 size={18} style={{ color: '#0078d4' }} />
-          <h2 className="text-base font-semibold" style={{ color: 'rgba(255,255,255,0.95)' }}>Coverage Matrix</h2>
-          <span className="text-sm ml-4" style={{ color: 'rgba(255,255,255,0.45)' }}>Requirements vs Test Types</span>
+          <Grid3X3 size={18} className="text-accent" />
+          <h2 className="text-base font-semibold text-content-primary">Coverage Matrix</h2>
+          <span className="text-sm ml-4 text-content-muted">Requirements vs Test Types</span>
         </div>
         <div className="text-sm">
-          <span style={{ color: 'rgba(255,255,255,0.45)' }}>Overall Coverage: </span>
-          <span className="text-lg font-semibold" style={{ color: parseFloat(coveragePct) > 70 ? '#339933' : '#f2c811' }}>
+          <span className="text-content-muted">Overall Coverage: </span>
+          <span className={`text-lg font-semibold ${parseFloat(coveragePct) > 70 ? 'text-status-pass' : 'text-status-blocked'}`}>
             {coveragePct}%
           </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-6 mb-4 text-xs" style={{ color: 'rgba(255,255,255,0.65)' }}>
+      <div className="flex items-center gap-6 mb-4 text-xs text-content-secondary">
         <div className="flex items-center gap-1.5"><span className="w-3 h-3" style={{ backgroundColor: 'rgba(51,153,51,0.25)', border: '1px solid rgba(51,153,51,0.4)' }} /> 3+ cases (covered)</div>
         <div className="flex items-center gap-1.5"><span className="w-3 h-3" style={{ backgroundColor: 'rgba(242,200,17,0.2)', border: '1px solid rgba(242,200,17,0.35)' }} /> 1-2 cases (partial)</div>
         <div className="flex items-center gap-1.5"><span className="w-3 h-3" style={{ backgroundColor: 'rgba(232,17,35,0.15)', border: '1px solid rgba(232,17,35,0.3)' }} /> 0 cases (gap)</div>
@@ -56,24 +56,24 @@ export const CoverageMatrix: React.FC = () => {
             {coverageMatrix.map(row => {
               const rowTotal = testTypes.reduce((sum, t) => sum + (row.testTypes[t]?.length || 0), 0);
               return (
-                <tr key={row.featureId} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <td className="px-3 py-2.5 text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{row.feature}</td>
+                <tr key={row.featureId} className="border-b border-line-subtle">
+                  <td className="px-3 py-2.5 text-sm font-medium text-content-secondary">{row.feature}</td>
                   {testTypes.map(t => (
                     <CoverageCell key={t} count={row.testTypes[t]?.length || 0} />
                   ))}
-                  <td className="px-3 py-2 text-center text-sm font-mono" style={{ color: 'rgba(255,255,255,0.65)' }}>{rowTotal}</td>
+                  <td className="px-3 py-2 text-center text-sm font-mono text-content-secondary">{rowTotal}</td>
                 </tr>
               );
             })}
           </tbody>
           <tfoot>
-            <tr style={{ backgroundColor: '#2d2d2d' }}>
-              <td className="px-3 py-2.5 text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>Column Total</td>
+            <tr className="bg-surface-elevated">
+              <td className="px-3 py-2.5 text-sm font-semibold text-content-secondary">Column Total</td>
               {testTypes.map(t => {
                 const colTotal = coverageMatrix.reduce((sum, row) => sum + (row.testTypes[t]?.length || 0), 0);
-                return <td key={t} className="px-3 py-2.5 text-center text-sm font-mono font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>{colTotal}</td>;
+                return <td key={t} className="px-3 py-2.5 text-center text-sm font-mono font-semibold text-content-secondary">{colTotal}</td>;
               })}
-              <td className="px-3 py-2.5 text-center text-sm font-mono font-bold" style={{ color: '#4fc3f7' }}>
+              <td className="px-3 py-2.5 text-center text-sm font-mono font-bold text-accent">
                 {coverageMatrix.reduce((sum, row) => sum + testTypes.reduce((s, t) => s + (row.testTypes[t]?.length || 0), 0), 0)}
               </td>
             </tr>

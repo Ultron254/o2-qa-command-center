@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../lib/store';
 import { Card } from '../components/ui/Card';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { formatDate } from '../lib/formatters';
-import { ArrowLeft, Tag, Clock, User, Link, FileText } from 'lucide-react';
+import { ArrowLeft, Tag, Clock, User, Link, FileText, Pencil } from 'lucide-react';
+import { TestCaseFormModal } from '../components/ui/modals/TestCaseFormModal';
 
 export const TestCaseDetail: React.FC = () => {
-  const { selectedTestCaseId, testCases, testSuites, defects, setPage } = useStore();
+  const { selectedTestCaseId, testCases, testSuites, defects, setPage, navigate } = useStore();
   const tc = testCases.find(c => c.id === selectedTestCaseId);
-  if (!tc) return <div className="p-6 text-text-muted">Test case not found.</div>;
+  const [showEditForm, setShowEditForm] = useState(false);
+
+  if (!tc) return <div className="p-6 text-content-muted">Test case not found.</div>;
 
   const suite = testSuites.find(s => s.id === tc.suiteId);
   const linkedDefects = defects.filter(d => tc.linkedDefects.includes(d.id));
@@ -24,16 +27,19 @@ export const TestCaseDetail: React.FC = () => {
       <div className="flex items-start justify-between mb-6">
         <div>
           <div className="mono-id text-base mb-1">{tc.id}</div>
-          <h2 className="text-xl font-semibold text-text-primary mb-2">{tc.title}</h2>
+          <h2 className="text-xl font-semibold text-content-primary mb-2">{tc.title}</h2>
           <div className="flex items-center gap-3 flex-wrap">
             <StatusBadge status={tc.status} />
             <PriorityBadge priority={tc.priority} />
-            <span className={`text-xs px-2 py-0.5 rounded ${tc.type === 'automated' ? 'bg-azure-blue/10 text-azure-blue' : 'bg-bg-elevated text-text-secondary'}`}>
+            <span className={`text-xs px-2 py-0.5 rounded ${tc.type === 'automated' ? 'bg-accent/10 text-accent' : 'bg-surface-elevated text-content-secondary'}`}>
               {tc.type === 'automated' ? 'Automated' : 'Manual'}
             </span>
-            <span className="text-xs text-text-muted">Suite: {suite?.name}</span>
+            <span className="text-xs text-content-muted">Suite: {suite?.name}</span>
           </div>
         </div>
+        <button onClick={() => setShowEditForm(true)} className="btn-secondary flex items-center gap-1 text-sm">
+          <Pencil size={14} /> Edit
+        </button>
       </div>
 
       <div className="grid grid-cols-3 gap-6">
@@ -41,15 +47,15 @@ export const TestCaseDetail: React.FC = () => {
         <div className="col-span-2 space-y-6">
           {/* Preconditions */}
           <Card hoverable={false} className="p-4">
-            <h3 className="text-sm font-semibold text-text-primary mb-2 flex items-center gap-2">
-              <FileText size={14} className="text-azure-blue-text" /> Preconditions
+            <h3 className="text-sm font-semibold text-content-primary mb-2 flex items-center gap-2">
+              <FileText size={14} className="text-content-link" /> Preconditions
             </h3>
-            <p className="text-sm text-text-secondary">{tc.preconditions}</p>
+            <p className="text-sm text-content-secondary">{tc.preconditions}</p>
           </Card>
 
           {/* Steps */}
           <Card hoverable={false} className="p-4">
-            <h3 className="text-sm font-semibold text-text-primary mb-3">Test Steps</h3>
+            <h3 className="text-sm font-semibold text-content-primary mb-3">Test Steps</h3>
             <table className="w-full">
               <thead>
                 <tr>
@@ -60,10 +66,10 @@ export const TestCaseDetail: React.FC = () => {
               </thead>
               <tbody>
                 {tc.steps.map(step => (
-                  <tr key={step.stepNumber} className="border-b border-border-subtle">
-                    <td className="px-4 py-3 text-center font-mono text-xs text-text-muted">{step.stepNumber}</td>
-                    <td className="px-4 py-3 text-sm text-text-primary">{step.action}</td>
-                    <td className="px-4 py-3 text-sm text-text-secondary">{step.expectedResult}</td>
+                  <tr key={step.stepNumber} className="border-b border-line-subtle">
+                    <td className="px-4 py-3 text-center font-mono text-xs text-content-muted">{step.stepNumber}</td>
+                    <td className="px-4 py-3 text-sm text-content-primary">{step.action}</td>
+                    <td className="px-4 py-3 text-sm text-content-secondary">{step.expectedResult}</td>
                   </tr>
                 ))}
               </tbody>
@@ -73,8 +79,8 @@ export const TestCaseDetail: React.FC = () => {
           {/* History */}
           {tc.history.length > 0 && (
             <Card hoverable={false} className="p-4">
-              <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-                <Clock size={14} className="text-azure-blue" /> Execution History
+              <h3 className="text-sm font-semibold text-content-primary mb-3 flex items-center gap-2">
+                <Clock size={14} className="text-accent" /> Execution History
               </h3>
               <table className="w-full">
                 <thead>
@@ -88,12 +94,16 @@ export const TestCaseDetail: React.FC = () => {
                 </thead>
                 <tbody>
                   {tc.history.map((h, i) => (
-                    <tr key={i} className="border-b border-border-subtle">
-                      <td className="px-4 py-2 mono-id text-xs">{h.runId}</td>
-                      <td className="px-4 py-2 text-sm text-text-secondary">{formatDate(h.date)}</td>
+                    <tr
+                      key={i}
+                      className="border-b border-line-subtle cursor-pointer hover:bg-surface-hover transition-colors"
+                      onClick={() => navigate('test-run-execution', h.runId)}
+                    >
+                      <td className="px-4 py-2 mono-id text-xs text-content-link">{h.runId}</td>
+                      <td className="px-4 py-2 text-sm text-content-secondary">{formatDate(h.date)}</td>
                       <td className="px-4 py-2 text-center"><StatusBadge status={h.status} size="sm" /></td>
-                      <td className="px-4 py-2 text-sm text-text-secondary">{h.tester}</td>
-                      <td className="px-4 py-2 text-sm text-text-muted text-right font-mono">{h.duration}</td>
+                      <td className="px-4 py-2 text-sm text-content-secondary">{h.tester}</td>
+                      <td className="px-4 py-2 text-sm text-content-muted text-right font-mono">{h.duration}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -105,33 +115,33 @@ export const TestCaseDetail: React.FC = () => {
         {/* Sidebar info */}
         <div className="space-y-4">
           <Card hoverable={false} className="p-4">
-            <h4 className="text-xs text-text-muted uppercase tracking-wider mb-3">Details</h4>
+            <h4 className="text-xs text-content-muted uppercase tracking-wider mb-3">Details</h4>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
-                <User size={14} className="text-text-muted" />
-                <span className="text-text-muted">Assigned:</span>
-                <span className="text-text-primary">{tc.assignedTo}</span>
+                <User size={14} className="text-content-muted" />
+                <span className="text-content-muted">Assigned:</span>
+                <span className="text-content-primary">{tc.assignedTo}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock size={14} className="text-text-muted" />
-                <span className="text-text-muted">Last Run:</span>
-                <span className="text-text-primary">{formatDate(tc.lastRunDate)}</span>
+                <Clock size={14} className="text-content-muted" />
+                <span className="text-content-muted">Last Run:</span>
+                <span className="text-content-primary">{formatDate(tc.lastRunDate)}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-text-muted text-xs">Automation:</span>
-                <span className="text-text-primary text-xs capitalize">{tc.automationStatus}</span>
+                <span className="text-content-muted text-xs">Automation:</span>
+                <span className="text-content-primary text-xs capitalize">{tc.automationStatus}</span>
               </div>
             </div>
           </Card>
 
           {/* Tags */}
           <Card hoverable={false} className="p-4">
-            <h4 className="text-xs text-text-muted uppercase tracking-wider mb-3 flex items-center gap-1">
+            <h4 className="text-xs text-content-muted uppercase tracking-wider mb-3 flex items-center gap-1">
               <Tag size={12} /> Tags
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {tc.tags.map(tag => (
-                <span key={tag} className="text-[11px] px-2 py-0.5 rounded bg-bg-elevated text-text-secondary border border-border-subtle">
+                <span key={tag} className="text-[11px] px-2 py-0.5 rounded bg-surface-elevated text-content-secondary border border-line-subtle">
                   {tag}
                 </span>
               ))}
@@ -141,19 +151,25 @@ export const TestCaseDetail: React.FC = () => {
           {/* Linked Defects */}
           {linkedDefects.length > 0 && (
             <Card hoverable={false} className="p-4">
-              <h4 className="text-xs text-text-muted uppercase tracking-wider mb-3 flex items-center gap-1">
+              <h4 className="text-xs text-content-muted uppercase tracking-wider mb-3 flex items-center gap-1">
                 <Link size={12} /> Linked Defects
               </h4>
               {linkedDefects.map(d => (
-                <div key={d.id} className="py-1.5 text-xs">
-                  <span className="mono-id">{d.id}</span>
-                  <span className="text-text-secondary ml-1">{d.title}</span>
+                <div
+                  key={d.id}
+                  className="py-1.5 text-xs cursor-pointer hover:text-content-link transition-colors"
+                  onClick={() => navigate('defects')}
+                >
+                  <span className="mono-id text-content-link">{d.id}</span>
+                  <span className="text-content-secondary ml-1">{d.title}</span>
                 </div>
               ))}
             </Card>
           )}
         </div>
       </div>
+
+      <TestCaseFormModal open={showEditForm} onClose={() => setShowEditForm(false)} testCase={tc} suiteId={tc.suiteId} />
     </div>
   );
 };

@@ -1,8 +1,25 @@
 import { create } from 'zustand';
-import type { PageId, TestCase, TestSuite, TestPlan, TestRun, Defect, Product, Environment, TeamMember, TestCaseFilters, DefectFilters, TestStatus, ActivityEntry, TrendDataPoint, CoverageMapping, TestStep } from './types';
+import type { PageId, ThemeId, TestCase, TestSuite, TestPlan, TestRun, Defect, Product, Environment, TeamMember, TestCaseFilters, DefectFilters, TestStatus, ActivityEntry, TrendDataPoint, CoverageMapping, TestStep } from './types';
 import { allTestCases, testRuns as seedRuns, defects as seedDefects, testSuites as seedSuites, testPlans as seedPlans, products as seedProducts, environments as seedEnvs, teamMembers as seedTeam, activityFeed as seedActivity, trendData as seedTrend, coverageMatrix as seedCoverage } from './data';
 
+function getInitialTheme(): ThemeId {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('o2-theme') as ThemeId | null;
+    if (saved && ['oxygene', 'light', 'dark'].includes(saved)) return saved;
+  }
+  return 'oxygene';
+}
+
+function applyTheme(theme: ThemeId) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('o2-theme', theme);
+}
+
 interface AppState {
+  // Theme
+  theme: ThemeId;
+  setTheme: (theme: ThemeId) => void;
+
   // Navigation
   currentPage: PageId;
   selectedTestCaseId: string | null;
@@ -47,12 +64,40 @@ interface AppState {
   setDefectFilter: <K extends keyof DefectFilters>(key: K, value: DefectFilters[K]) => void;
   clearDefectFilters: () => void;
 
-  // CRUD
-  addDefect: (defect: Defect) => void;
-  updateDefect: (id: string, updates: Partial<Defect>) => void;
+  // CRUD — Products
+  addProduct: (product: Product) => void;
+  updateProduct: (id: string, updates: Partial<Product>) => void;
+  deleteProduct: (id: string) => void;
+
+  // CRUD — Environments
+  addEnvironment: (env: Environment) => void;
+  updateEnvironment: (id: string, updates: Partial<Environment>) => void;
+  deleteEnvironment: (id: string) => void;
+
+  // CRUD — Team Members
+  addTeamMember: (member: TeamMember) => void;
+  updateTeamMember: (id: string, updates: Partial<TeamMember>) => void;
+  deleteTeamMember: (id: string) => void;
+
+  // CRUD — Test Plans
+  addTestPlan: (plan: TestPlan) => void;
+  updateTestPlan: (id: string, updates: Partial<TestPlan>) => void;
+
+  // CRUD — Test Suites
+  addTestSuite: (suite: TestSuite) => void;
+
+  // CRUD — Test Cases
+  addTestCase: (tc: TestCase) => void;
+  updateTestCase: (id: string, updates: Partial<TestCase>) => void;
   updateTestCaseStatus: (id: string, status: TestStatus) => void;
 
+  // CRUD — Defects
+  addDefect: (defect: Defect) => void;
+  updateDefect: (id: string, updates: Partial<Defect>) => void;
+  deleteDefect: (id: string) => void;
+
   // Test execution
+  addTestRun: (run: TestRun) => void;
   startTestRun: (run: TestRun) => void;
   setActiveRunCaseIndex: (index: number) => void;
   updateExecutionStep: (caseId: string, stepNumber: number, updates: Partial<TestStep>) => void;
@@ -70,7 +115,14 @@ interface AppState {
 const defaultTestCaseFilters: TestCaseFilters = { search: '', suiteId: null, type: null, priority: null, status: null };
 const defaultDefectFilters: DefectFilters = { search: '', severity: null, priority: null, status: null };
 
+const initialTheme = getInitialTheme();
+applyTheme(initialTheme);
+
 export const useStore = create<AppState>((set, get) => ({
+  // Theme
+  theme: initialTheme,
+  setTheme: (theme) => { applyTheme(theme); set({ theme }); },
+
   // Navigation
   currentPage: 'dashboard',
   selectedTestCaseId: null,
@@ -121,16 +173,60 @@ export const useStore = create<AppState>((set, get) => ({
   setDefectFilter: (key, value) => set(s => ({ defectFilters: { ...s.defectFilters, [key]: value } })),
   clearDefectFilters: () => set({ defectFilters: { ...defaultDefectFilters } }),
 
-  // CRUD
-  addDefect: (defect) => set(s => ({ defects: [...s.defects, defect] })),
-  updateDefect: (id, updates) => set(s => ({
-    defects: s.defects.map(d => d.id === id ? { ...d, ...updates } : d),
+  // CRUD — Products
+  addProduct: (product) => set(s => ({ products: [...s.products, product] })),
+  updateProduct: (id, updates) => set(s => ({
+    products: s.products.map(p => p.id === id ? { ...p, ...updates } : p),
+  })),
+  deleteProduct: (id) => set(s => ({ products: s.products.filter(p => p.id !== id) })),
+
+  // CRUD — Environments
+  addEnvironment: (env) => set(s => ({ environments: [...s.environments, env] })),
+  updateEnvironment: (id, updates) => set(s => ({
+    environments: s.environments.map(e => e.id === id ? { ...e, ...updates } : e),
+  })),
+  deleteEnvironment: (id) => set(s => ({ environments: s.environments.filter(e => e.id !== id) })),
+
+  // CRUD — Team Members
+  addTeamMember: (member) => set(s => ({ teamMembers: [...s.teamMembers, member] })),
+  updateTeamMember: (id, updates) => set(s => ({
+    teamMembers: s.teamMembers.map(m => m.id === id ? { ...m, ...updates } : m),
+  })),
+  deleteTeamMember: (id) => set(s => ({ teamMembers: s.teamMembers.filter(m => m.id !== id) })),
+
+  // CRUD — Test Plans
+  addTestPlan: (plan) => set(s => ({ testPlans: [...s.testPlans, plan] })),
+  updateTestPlan: (id, updates) => set(s => ({
+    testPlans: s.testPlans.map(p => p.id === id ? { ...p, ...updates } : p),
+  })),
+
+  // CRUD — Test Suites
+  addTestSuite: (suite) => set(s => ({ testSuites: [...s.testSuites, suite] })),
+
+  // CRUD — Test Cases
+  addTestCase: (tc) => set(s => ({ testCases: [...s.testCases, tc] })),
+  updateTestCase: (id, updates) => set(s => ({
+    testCases: s.testCases.map(tc => tc.id === id ? { ...tc, ...updates } : tc),
   })),
   updateTestCaseStatus: (id, status) => set(s => ({
     testCases: s.testCases.map(tc => tc.id === id ? { ...tc, status } : tc),
   })),
 
+  // CRUD — Defects
+  addDefect: (defect) => set(s => ({ defects: [...s.defects, defect] })),
+  updateDefect: (id, updates) => set(s => ({
+    defects: s.defects.map(d => d.id === id ? { ...d, ...updates } : d),
+  })),
+  deleteDefect: (id) => set(s => ({ defects: s.defects.filter(d => d.id !== id) })),
+
   // Test execution
+  addTestRun: (run) => set(s => ({
+    testRuns: [...s.testRuns, run],
+    activeRunId: run.id,
+    activeRunCaseIndex: 0,
+    currentPage: 'test-run-execution' as PageId,
+    selectedTestRunId: run.id,
+  })),
   startTestRun: (run) => set(s => ({
     testRuns: [...s.testRuns, run],
     activeRunId: run.id,

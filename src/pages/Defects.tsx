@@ -5,23 +5,40 @@ import { SeverityBadge } from '../components/ui/SeverityBadge';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
 import { formatDate } from '../lib/formatters';
 import { Bug, Search, Plus, X } from 'lucide-react';
+import { DefectFormModal } from '../components/ui/modals/DefectFormModal';
 import type { DefectStatus, SeverityLevel, Defect } from '../lib/types';
 
 const defectStatusColors: Record<DefectStatus, string> = {
   new: 'bg-status-running/10 text-status-running',
   in_progress: 'bg-status-blocked/10 text-status-blocked',
   resolved: 'bg-status-pass/10 text-status-pass',
-  verified: 'bg-azure-blue/10 text-azure-blue',
-  closed: 'bg-bg-elevated text-text-muted',
+  verified: 'bg-accent/10 text-accent',
+  closed: 'bg-surface-elevated text-content-muted',
 };
 
 const workflowSteps: DefectStatus[] = ['new', 'in_progress', 'resolved', 'verified', 'closed'];
 
 export const Defects: React.FC = () => {
-  const { getFilteredDefects, defectFilters, setDefectFilter } = useStore();
+  const { getFilteredDefects, defectFilters, setDefectFilter, updateDefect, navigate } = useStore();
   const filtered = getFilteredDefects();
   const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editDefect, setEditDefect] = useState<Defect | undefined>(undefined);
+
+  const handleOpenCreate = () => {
+    setEditDefect(undefined);
+    setShowForm(true);
+  };
+
+  const handleOpenEdit = (defect: Defect) => {
+    setEditDefect(defect);
+    setShowForm(true);
+  };
+
+  const handleAdvanceStatus = (defect: Defect, targetStatus: DefectStatus) => {
+    updateDefect(defect.id, { status: targetStatus, updatedAt: new Date().toISOString() });
+    setSelectedDefect({ ...defect, status: targetStatus });
+  };
 
   return (
     <div className="p-6 h-full flex gap-6 animate-fade-in">
@@ -30,9 +47,9 @@ export const Defects: React.FC = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Bug size={20} className="text-status-fail" /> Defects
-            <span className="text-sm font-normal text-text-muted ml-2">{filtered.length} total</span>
+            <span className="text-sm font-normal text-content-muted ml-2">{filtered.length} total</span>
           </h2>
-          <button className="btn-primary text-sm flex items-center gap-1" onClick={() => setShowCreate(!showCreate)}>
+          <button className="btn-primary text-sm flex items-center gap-1" onClick={handleOpenCreate}>
             <Plus size={14} /> Log Defect
           </button>
         </div>
@@ -40,7 +57,7 @@ export const Defects: React.FC = () => {
         {/* Filters */}
         <div className="flex gap-3 mb-4 flex-wrap">
           <div className="relative flex-1 max-w-xs">
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
             <input className="input pl-8 w-full" placeholder="Search defects..." value={defectFilters.search} onChange={e => setDefectFilter('search', e.target.value)} />
           </div>
           <select className="input" value={defectFilters.severity || ''} onChange={e => setDefectFilter('severity', (e.target.value || null) as SeverityLevel | null)}>
@@ -57,7 +74,7 @@ export const Defects: React.FC = () => {
         </div>
 
         {/* Table */}
-        <div className="flex-1 overflow-auto border border-border-default">
+        <div className="flex-1 overflow-auto border border-line">
           <table className="w-full">
             <thead className="sticky top-0 z-10">
               <tr>
@@ -72,7 +89,7 @@ export const Defects: React.FC = () => {
             </thead>
             <tbody>
               {filtered.map(d => (
-                <tr key={d.id} className={`table-row ${selectedDefect?.id === d.id ? 'bg-bg-hover' : ''}`} onClick={() => setSelectedDefect(d)}>
+                <tr key={d.id} className={`table-row ${selectedDefect?.id === d.id ? 'bg-surface-hover' : ''}`} onClick={() => setSelectedDefect(d)}>
                   <td className="table-cell mono-id">{d.id}</td>
                   <td className="table-cell">{d.title}</td>
                   <td className="table-cell text-center"><SeverityBadge severity={d.severity} /></td>
@@ -82,8 +99,8 @@ export const Defects: React.FC = () => {
                       {d.status.replace('_', ' ')}
                     </span>
                   </td>
-                  <td className="table-cell text-text-secondary text-xs">{d.assignee}</td>
-                  <td className="table-cell text-text-muted text-xs">{formatDate(d.createdAt)}</td>
+                  <td className="table-cell text-content-secondary text-xs">{d.assignee}</td>
+                  <td className="table-cell text-content-muted text-xs">{formatDate(d.createdAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -98,9 +115,12 @@ export const Defects: React.FC = () => {
             <div className="flex items-start justify-between mb-4">
               <div>
                 <span className="mono-id text-sm">{selectedDefect.id}</span>
-                <h3 className="text-base font-semibold text-text-primary mt-1">{selectedDefect.title}</h3>
+                <h3 className="text-base font-semibold text-content-primary mt-1">{selectedDefect.title}</h3>
               </div>
-              <button onClick={() => setSelectedDefect(null)} className="btn-ghost p-1"><X size={16} /></button>
+              <div className="flex items-center gap-2">
+                <button onClick={() => handleOpenEdit(selectedDefect)} className="btn-ghost text-xs">Edit</button>
+                <button onClick={() => setSelectedDefect(null)} className="btn-ghost p-1"><X size={16} /></button>
+              </div>
             </div>
 
             <div className="flex items-center gap-3 mb-4">
@@ -111,17 +131,20 @@ export const Defects: React.FC = () => {
               </span>
             </div>
 
-            {/* Workflow */}
+            {/* Workflow — clickable to advance status */}
             <div className="flex items-center gap-1 mb-6">
               {workflowSteps.map((step, i) => {
                 const isActive = step === selectedDefect.status;
                 const isPast = workflowSteps.indexOf(selectedDefect.status) > i;
                 return (
                   <React.Fragment key={step}>
-                    <div className={`text-[10px] px-2 py-1 rounded capitalize font-medium ${isActive ? defectStatusColors[step] : isPast ? 'bg-status-pass/5 text-status-pass' : 'bg-bg-elevated text-text-muted'}`}>
+                    <button
+                      onClick={() => handleAdvanceStatus(selectedDefect, step)}
+                      className={`text-[10px] px-2 py-1 rounded capitalize font-medium cursor-pointer transition-colors hover:ring-1 hover:ring-accent ${isActive ? defectStatusColors[step] : isPast ? 'bg-status-pass/5 text-status-pass' : 'bg-surface-elevated text-content-muted'}`}
+                    >
                       {step.replace('_', ' ')}
-                    </div>
-                    {i < workflowSteps.length - 1 && <div className={`w-4 h-px ${isPast ? 'bg-status-pass' : 'bg-border-default'}`} />}
+                    </button>
+                    {i < workflowSteps.length - 1 && <div className={`w-4 h-px ${isPast ? 'bg-status-pass' : 'bg-line'}`} />}
                   </React.Fragment>
                 );
               })}
@@ -129,35 +152,41 @@ export const Defects: React.FC = () => {
 
             <div className="space-y-4 text-sm">
               <div>
-                <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Description</div>
-                <p className="text-text-secondary">{selectedDefect.description}</p>
+                <div className="text-xs text-content-muted uppercase tracking-wider mb-1">Description</div>
+                <p className="text-content-secondary">{selectedDefect.description}</p>
               </div>
               <div>
-                <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Steps to Reproduce</div>
-                <pre className="text-text-secondary font-mono text-xs whitespace-pre-wrap bg-bg-inset p-3 rounded">{selectedDefect.stepsToReproduce}</pre>
+                <div className="text-xs text-content-muted uppercase tracking-wider mb-1">Steps to Reproduce</div>
+                <pre className="text-content-secondary font-mono text-xs whitespace-pre-wrap bg-surface-inset p-3 rounded">{selectedDefect.stepsToReproduce}</pre>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Expected</div>
+                  <div className="text-xs text-content-muted uppercase tracking-wider mb-1">Expected</div>
                   <p className="text-status-pass text-xs">{selectedDefect.expectedBehavior}</p>
                 </div>
                 <div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Actual</div>
+                  <div className="text-xs text-content-muted uppercase tracking-wider mb-1">Actual</div>
                   <p className="text-status-fail text-xs">{selectedDefect.actualBehavior}</p>
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 text-xs">
-                <div><span className="text-text-muted">Environment:</span> <span className="text-text-secondary">{selectedDefect.environment}</span></div>
-                <div><span className="text-text-muted">Browser:</span> <span className="text-text-secondary">{selectedDefect.browser}</span></div>
-                <div><span className="text-text-muted">Assignee:</span> <span className="text-text-secondary">{selectedDefect.assignee}</span></div>
-                <div><span className="text-text-muted">Created by:</span> <span className="text-text-secondary">{selectedDefect.createdBy}</span></div>
+                <div><span className="text-content-muted">Environment:</span> <span className="text-content-secondary">{selectedDefect.environment}</span></div>
+                <div><span className="text-content-muted">Browser:</span> <span className="text-content-secondary">{selectedDefect.browser}</span></div>
+                <div><span className="text-content-muted">Assignee:</span> <span className="text-content-secondary">{selectedDefect.assignee}</span></div>
+                <div><span className="text-content-muted">Created by:</span> <span className="text-content-secondary">{selectedDefect.createdBy}</span></div>
               </div>
               {selectedDefect.linkedTestCases.length > 0 && (
                 <div>
-                  <div className="text-xs text-text-muted uppercase tracking-wider mb-1">Linked Test Cases</div>
+                  <div className="text-xs text-content-muted uppercase tracking-wider mb-1">Linked Test Cases</div>
                   <div className="flex flex-wrap gap-1">
                     {selectedDefect.linkedTestCases.map(id => (
-                      <span key={id} className="mono-id text-xs px-2 py-0.5 bg-bg-elevated rounded">{id}</span>
+                      <button
+                        key={id}
+                        onClick={() => navigate('test-case-detail', id)}
+                        className="mono-id text-xs px-2 py-0.5 bg-surface-elevated rounded hover:bg-accent/10 hover:text-accent transition-colors cursor-pointer"
+                      >
+                        {id}
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -166,6 +195,8 @@ export const Defects: React.FC = () => {
           </Card>
         </div>
       )}
+
+      <DefectFormModal open={showForm} onClose={() => setShowForm(false)} defect={editDefect} />
     </div>
   );
 };

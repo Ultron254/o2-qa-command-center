@@ -78,11 +78,8 @@ export const Sidebar: React.FC = () => {
 
   return (
     <div className="flex h-screen shrink-0">
-      {/* Azure DevOps Vertical Icon Rail */}
-      <div
-        className="w-[46px] h-full flex flex-col items-center py-2 shrink-0"
-        style={{ backgroundColor: '#1e1e1e', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-      >
+      {/* Vertical Icon Rail */}
+      <div className="w-[46px] h-full flex flex-col items-center py-2 shrink-0 bg-surface-primary border-r border-line">
         {navGroups.map((group) => {
           const GroupIcon = group.icon;
           const isActive = activeGroup?.title === group.title;
@@ -93,22 +90,18 @@ export const Sidebar: React.FC = () => {
                 if (sidebarCollapsed) toggleSidebar();
                 setPage(group.items[0].id);
               }}
-              className="w-full flex items-center justify-center py-2.5 relative transition-colors group"
+              className={`w-full flex items-center justify-center py-2.5 relative transition-colors group ${
+                isActive ? 'text-accent' : 'text-content-secondary hover:text-content-primary'
+              }`}
               title={group.title}
-              style={{
-                color: isActive ? '#ffffff' : 'rgba(255,255,255,0.55)',
-              }}
             >
               {isActive && (
-                <div
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 rounded-r-sm"
-                  style={{ backgroundColor: '#0078d4' }}
-                />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 rounded-r-sm bg-accent" />
               )}
               <GroupIcon
                 size={18}
                 strokeWidth={isActive ? 2 : 1.5}
-                className="transition-colors group-hover:text-white"
+                className="transition-colors group-hover:text-content-primary"
               />
             </button>
           );
@@ -117,24 +110,18 @@ export const Sidebar: React.FC = () => {
         <div className="flex-1" />
 
         {/* Bottom project indicator */}
-        <div className="w-7 h-7 rounded-full flex items-center justify-center mb-2" style={{ backgroundColor: '#0078d4' }}>
-          <span className="text-[9px] font-bold text-white">O2</span>
+        <div className="w-7 h-7 rounded-full flex items-center justify-center mb-2 bg-accent text-content-inverse">
+          <span className="text-[9px] font-bold">O2</span>
         </div>
       </div>
 
       {/* Expanded Navigation Panel */}
       {!sidebarCollapsed && (
-        <aside
-          className="w-52 h-full flex flex-col overflow-hidden transition-all duration-150"
-          style={{ backgroundColor: '#252526', borderRight: '1px solid rgba(255,255,255,0.06)' }}
-        >
+        <aside className="w-52 h-full flex flex-col overflow-hidden transition-all duration-150 bg-surface-secondary border-r border-line">
           {/* Panel Header */}
-          <div
-            className="flex items-center px-3 h-9 shrink-0"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-          >
-            <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.5)' }}>
-              Test Plans
+          <div className="flex items-center px-3 h-9 shrink-0 border-b border-line">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-content-secondary">
+              O2 QA Center
             </span>
           </div>
 
@@ -148,13 +135,13 @@ export const Sidebar: React.FC = () => {
                 <div key={group.title} className="mb-0.5">
                   <button
                     onClick={() => toggleGroup(group.title)}
-                    className="w-full flex items-center gap-2 px-3 py-[6px] text-left transition-colors hover:bg-[#2a2d2e]"
-                    style={{ color: isGroupActive ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.6)' }}
+                    className={`w-full flex items-center gap-2 px-3 py-[6px] text-left transition-colors hover:bg-surface-hover ${
+                      isGroupActive ? 'text-content-primary' : 'text-content-secondary'
+                    }`}
                   >
                     <ChevronDown
                       size={11}
-                      className={`transition-transform duration-150 ${isGroupExpanded ? '' : '-rotate-90'}`}
-                      style={{ color: 'rgba(255,255,255,0.3)' }}
+                      className={`transition-transform duration-150 text-content-muted ${isGroupExpanded ? '' : '-rotate-90'}`}
                     />
                     <span className="text-[12px] flex-1 font-medium">{group.title}</span>
                   </button>
@@ -168,19 +155,11 @@ export const Sidebar: React.FC = () => {
                             key={item.id}
                             id={`nav-${item.id}`}
                             onClick={() => setPage(item.id)}
-                            className="w-full flex items-center py-[5px] text-left transition-colors duration-75 text-[12px]"
-                            style={{
-                              color: isActive ? '#ffffff' : 'rgba(255,255,255,0.6)',
-                              backgroundColor: isActive ? '#37373d' : 'transparent',
-                              borderLeft: isActive ? '2px solid #0078d4' : '2px solid transparent',
-                              paddingLeft: '14px',
-                            }}
-                            onMouseEnter={e => {
-                              if (!isActive) e.currentTarget.style.backgroundColor = '#2a2d2e';
-                            }}
-                            onMouseLeave={e => {
-                              if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            className={`w-full flex items-center py-[5px] pl-3.5 text-left transition-colors duration-75 text-[12px] border-l-2 ${
+                              isActive
+                                ? 'bg-surface-elevated text-content-primary border-accent'
+                                : 'text-content-secondary border-transparent hover:bg-surface-hover'
+                            }`}
                           >
                             <span>{item.label}</span>
                           </button>
@@ -193,10 +172,10 @@ export const Sidebar: React.FC = () => {
             })}
           </nav>
 
-          {/* Bottom: Environment Info (ADO-style) */}
-          <div className="px-3 py-2 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex items-center gap-1.5 text-[11px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              <span className="w-[6px] h-[6px] rounded-full" style={{ backgroundColor: '#339933' }} />
+          {/* Bottom: Environment Info */}
+          <div className="px-3 py-2 shrink-0 border-t border-line">
+            <div className="flex items-center gap-1.5 text-[11px] text-content-muted">
+              <span className="w-[6px] h-[6px] rounded-full bg-green-500" />
               <span>MSIT v1 · Production</span>
             </div>
           </div>

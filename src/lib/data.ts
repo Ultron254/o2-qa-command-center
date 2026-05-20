@@ -33,8 +33,8 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-UNIT-004','TC-UNIT-005'],
     stepsToReproduce: '1. Call calculateSIS with all components set to 2.5\n2. Observe returned value',
     expectedBehavior: 'Returns 50.00', actualBehavior: 'Returns 49.99',
-    environment: 'Development', browser: 'Chrome 120', assignee: 'Sarah Wanjiku',
-    createdBy: 'James Ochieng', createdAt: '2026-05-08', updatedAt: '2026-05-17',
+    environment: 'Development', browser: 'Chrome 120', assignee: 'Ultron QA',
+    createdBy: 'Ultron QA', createdAt: '2026-05-08', updatedAt: '2026-05-17',
   },
   {
     id: 'DEF-002', title: 'POST /api/scores returns 500 when risk component is 0',
@@ -43,8 +43,8 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-API-005'],
     stepsToReproduce: '1. Send POST /api/scores with risk: 0\n2. Observe 500 error',
     expectedBehavior: 'Returns 400 with validation error', actualBehavior: 'Returns 500 Internal Server Error',
-    environment: 'Staging', browser: 'N/A (API)', assignee: 'James Ochieng',
-    createdBy: 'Sarah Wanjiku', createdAt: '2026-05-12', updatedAt: '2026-05-16',
+    environment: 'Staging', browser: 'N/A (API)', assignee: 'Ultron QA',
+    createdBy: 'Ultron QA', createdAt: '2026-05-12', updatedAt: '2026-05-16',
   },
   {
     id: 'DEF-003', title: 'Quadrant map dots overlap at boundary threshold values',
@@ -53,8 +53,8 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-SMOKE-006','TC-UI-007'],
     stepsToReproduce: '1. Navigate to Quadrant Map\n2. Observe stakeholders at boundary values\n3. Try to click overlapping dots',
     expectedBehavior: 'Dots at boundaries should be offset or show tooltip on hover', actualBehavior: 'Dots stack on top of each other and are unclickable',
-    environment: 'Production', browser: 'Chrome 120, Firefox 121', assignee: 'Sarah Wanjiku',
-    createdBy: 'James Ochieng', createdAt: '2026-05-18', updatedAt: '2026-05-18',
+    environment: 'Production', browser: 'Chrome 120, Firefox 121', assignee: 'Ultron QA',
+    createdBy: 'Ultron QA', createdAt: '2026-05-18', updatedAt: '2026-05-18',
   },
   {
     id: 'DEF-004', title: 'Toast notifications stack without limit',
@@ -63,7 +63,7 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-FLOW-014','TC-STORE-009'],
     stepsToReproduce: '1. Rapidly click save 20+ times\n2. Observe toast stack',
     expectedBehavior: 'Maximum 3-5 toasts visible, oldest dismissed', actualBehavior: 'All 20+ toasts stack and overflow viewport',
-    environment: 'Development', browser: 'Chrome 120', assignee: 'James Ochieng',
+    environment: 'Development', browser: 'Chrome 120', assignee: 'Ultron QA',
     createdBy: 'Ultron', createdAt: '2026-05-14', updatedAt: '2026-05-14',
   },
   {
@@ -83,8 +83,8 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-UI-012','TC-SEC-008'],
     stepsToReproduce: '1. Open Add Stakeholder form\n2. Upload a .heic portrait image\n3. Submit form',
     expectedBehavior: 'Either accept HEIC or show clear error about unsupported format', actualBehavior: 'Upload appears to succeed but no image is saved',
-    environment: 'Production', browser: 'Safari 17', assignee: 'Sarah Wanjiku',
-    createdBy: 'Sarah Wanjiku', createdAt: '2026-05-13', updatedAt: '2026-05-13',
+    environment: 'Production', browser: 'Safari 17', assignee: 'Ultron QA',
+    createdBy: 'Ultron QA', createdAt: '2026-05-13', updatedAt: '2026-05-13',
   },
   {
     id: 'DEF-007', title: 'Watchlist critical signal pulsing animation missing in Firefox',
@@ -93,8 +93,8 @@ export const defects: Defect[] = [
     linkedTestCases: ['TC-UI-010'],
     stepsToReproduce: '1. Open Watchlist in Firefox 121+\n2. View a critical severity signal',
     expectedBehavior: 'Left border pulses with red animation', actualBehavior: 'Static border, no animation',
-    environment: 'Production', browser: 'Firefox 121', assignee: 'James Ochieng',
-    createdBy: 'Sarah Wanjiku', createdAt: '2026-05-13', updatedAt: '2026-05-13',
+    environment: 'Production', browser: 'Firefox 121', assignee: 'Ultron QA',
+    createdBy: 'Ultron QA', createdAt: '2026-05-13', updatedAt: '2026-05-13',
   },
   {
     id: 'DEF-008', title: 'E2E pipeline test blocked by Kafka consumer lag',
@@ -104,7 +104,7 @@ export const defects: Defect[] = [
     stepsToReproduce: '1. Run TC-PIPE-005 end-to-end pipeline test\n2. Wait for Kafka consumer processing\n3. Test times out at 30s',
     expectedBehavior: 'Consumer processes within 10 seconds', actualBehavior: 'Consumer lag causes timeout at 30 seconds',
     environment: 'Development', browser: 'N/A', assignee: 'Ultron',
-    createdBy: 'James Ochieng', createdAt: '2026-05-16', updatedAt: '2026-05-18',
+    createdBy: 'Ultron QA', createdAt: '2026-05-16', updatedAt: '2026-05-18',
   },
 ];
 
@@ -112,7 +112,7 @@ export const defects: Defect[] = [
 export const testRuns: TestRun[] = [
   {
     id: 'RUN-001', name: 'Smoke Tests - Sprint 12', planId: 'plan-001', suiteId: 'suite-smoke',
-    testerId: 'tm-002', date: '2026-05-18T14:00:00Z', duration: '12m 34s', status: 'completed',
+    testerId: 'tm-001', date: '2026-05-18T14:00:00Z', duration: '12m 34s', status: 'completed',
     executions: smokeTests.map(tc => ({
       testCaseId: tc.id, status: tc.status,
       steps: tc.steps.map(s => ({ ...s, actualResult: s.expectedResult, status: tc.status })),
@@ -121,7 +121,7 @@ export const testRuns: TestRun[] = [
   },
   {
     id: 'RUN-002', name: 'Scoring Engine Full Suite', planId: 'plan-001', suiteId: 'suite-unit',
-    testerId: 'tm-002', date: '2026-05-17T10:00:00Z', duration: '1m 45s', status: 'completed',
+    testerId: 'tm-001', date: '2026-05-17T10:00:00Z', duration: '1m 45s', status: 'completed',
     executions: unitTests.map(tc => ({
       testCaseId: tc.id, status: tc.status,
       steps: tc.steps.map(s => ({ ...s, actualResult: s.expectedResult, status: tc.status })),
@@ -130,7 +130,7 @@ export const testRuns: TestRun[] = [
   },
   {
     id: 'RUN-003', name: 'API Validation - v2 Backend', planId: 'plan-001', suiteId: 'suite-api',
-    testerId: 'tm-003', date: '2026-05-16T09:00:00Z', duration: '8m 20s', status: 'completed',
+    testerId: 'tm-001', date: '2026-05-16T09:00:00Z', duration: '8m 20s', status: 'completed',
     executions: apiTests.map(tc => ({
       testCaseId: tc.id, status: tc.status,
       steps: tc.steps.map(s => ({ ...s, actualResult: s.expectedResult, status: tc.status })),

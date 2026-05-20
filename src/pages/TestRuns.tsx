@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../lib/store';
-
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { formatDateTime } from '../lib/formatters';
 import { Play } from 'lucide-react';
+import { TestRunFormModal } from '../components/ui/modals/TestRunFormModal';
 import type { RunStatus } from '../lib/types';
 
 const runStatusColors: Record<RunStatus, string> = {
@@ -14,17 +14,18 @@ const runStatusColors: Record<RunStatus, string> = {
 
 export const TestRuns: React.FC = () => {
   const { testRuns, teamMembers, navigate } = useStore();
+  const [showForm, setShowForm] = useState(false);
 
   return (
     <div className="p-6 h-full overflow-y-auto animate-fade-in">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-lg font-semibold flex items-center gap-2">
-          <Play size={20} className="text-azure-blue" /> Test Runs
+          <Play size={20} className="text-accent" /> Test Runs
         </h2>
-        <button className="btn-primary text-sm">New Test Run</button>
+        <button className="btn-primary text-sm" onClick={() => setShowForm(true)}>New Test Run</button>
       </div>
 
-      <div className="border border-border-default overflow-hidden">
+      <div className="border border-line overflow-hidden">
         <table className="w-full">
           <thead>
             <tr>
@@ -49,13 +50,13 @@ export const TestRuns: React.FC = () => {
                 <tr key={run.id} className="table-row" onClick={() => navigate('test-run-execution', run.id)}>
                   <td className="table-cell mono-id">{run.id}</td>
                   <td className="table-cell font-medium">{run.name}</td>
-                  <td className="table-cell text-text-secondary text-sm">{tester?.name}</td>
-                  <td className="table-cell text-text-secondary text-sm">{formatDateTime(run.date)}</td>
-                  <td className="table-cell text-right font-mono text-sm text-text-muted">{run.duration}</td>
+                  <td className="table-cell text-content-secondary text-sm">{tester?.name}</td>
+                  <td className="table-cell text-content-secondary text-sm">{formatDateTime(run.date)}</td>
+                  <td className="table-cell text-right font-mono text-sm text-content-muted">{run.duration}</td>
                   <td className="table-cell">
                     <div className="flex items-center gap-2">
                       <ProgressBar pass={passed} fail={failed} blocked={blocked} skip={skipped} notRun={notRun} height="h-1.5" />
-                      <span className="text-xs text-text-muted font-mono whitespace-nowrap">{passed}/{run.executions.length}</span>
+                      <span className="text-xs text-content-muted font-mono whitespace-nowrap">{passed}/{run.executions.length}</span>
                     </div>
                   </td>
                   <td className="table-cell text-center">
@@ -69,6 +70,8 @@ export const TestRuns: React.FC = () => {
           </tbody>
         </table>
       </div>
+
+      <TestRunFormModal open={showForm} onClose={() => setShowForm(false)} />
     </div>
   );
 };

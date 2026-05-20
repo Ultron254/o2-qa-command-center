@@ -1,7 +1,8 @@
 import React from 'react';
 import { useStore } from '../../lib/store';
-import { Search, Bell, Settings, HelpCircle, ChevronRight } from 'lucide-react';
+import { Search, Bell, Settings, HelpCircle, ChevronRight, Sun, Moon, Monitor } from 'lucide-react';
 import type { PageId } from '../../lib/types';
+import type { ThemeId } from '../../lib/types';
 
 const pageTitles: Record<PageId, string> = {
   'dashboard': 'Summary',
@@ -20,74 +21,79 @@ const pageTitles: Record<PageId, string> = {
   'team': 'Team',
 };
 
+const themeOptions: { id: ThemeId; icon: React.ElementType; label: string }[] = [
+  { id: 'oxygene', icon: Sun, label: 'Oxygene' },
+  { id: 'light', icon: Monitor, label: 'Light' },
+  { id: 'dark', icon: Moon, label: 'Dark' },
+];
+
 export const Header: React.FC = () => {
-  const { currentPage } = useStore();
+  const { currentPage, theme, setTheme } = useStore();
 
   return (
-    <header className="flex items-center shrink-0" style={{
-      height: '40px',
-      backgroundColor: '#000000',
-      borderBottom: '1px solid rgba(255,255,255,0.08)',
-    }}>
-      {/* Left: Azure DevOps logo + breadcrumb */}
+    <header className="flex items-center shrink-0 h-10 bg-surface-header border-b border-line">
+      {/* Left: Oxygene branding + breadcrumb */}
       <div className="flex items-center gap-2 px-3 h-full">
-        {/* Azure DevOps icon */}
         <div className="flex items-center gap-1.5">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M15 3.622v8.512L11.5 15l-5.425-1.975v1.958L3.004 10.97l8.951.7V4.005L15 3.622zm-2.984.428L6.994 1v1.97L1.597 4.727 1 6.095v4.212l2.004.963V5.394l9.012-1.344z" fill="#0078d4"/>
-          </svg>
-          <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px' }}>Azure DevOps</span>
+          <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+            <span className="text-[8px] font-bold text-white leading-none">O2</span>
+          </div>
+          <span className="text-[13px] text-content-secondary">Oxygene</span>
         </div>
 
-        {/* Breadcrumb separator */}
-        <ChevronRight size={12} style={{ color: 'rgba(255,255,255,0.35)' }} />
-        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>Oxygene</span>
-        <ChevronRight size={12} style={{ color: 'rgba(255,255,255,0.35)' }} />
-        <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>O2 QA</span>
-        <ChevronRight size={12} style={{ color: 'rgba(255,255,255,0.35)' }} />
-        <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: '13px', fontWeight: 600 }}>
+        <ChevronRight size={12} className="text-content-muted" />
+        <span className="text-[13px] text-content-secondary">O2 QA</span>
+        <ChevronRight size={12} className="text-content-muted" />
+        <span className="text-[13px] font-semibold text-content-primary">
           {pageTitles[currentPage]}
         </span>
       </div>
 
-      {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Right: Search + icons */}
+      {/* Right: Search + theme toggle + icons */}
       <div className="flex items-center gap-1 px-2 h-full">
-        {/* Search */}
-        <div className="relative mr-1">
-          <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2" style={{ color: 'rgba(255,255,255,0.4)' }} />
-          <input
-            type="text"
-            placeholder="Search"
-            className="pl-7 pr-2 py-1 text-xs rounded-sm outline-none"
-            style={{
-              width: '180px',
-              backgroundColor: '#1b1b1b',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: 'rgba(255,255,255,0.8)',
-            }}
-            readOnly
-          />
+        {/* Search trigger - opens Cmd+K palette */}
+        <button
+          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
+          className="relative mr-1 flex items-center gap-2 pl-7 pr-2 py-1 text-xs rounded-sm w-[200px] bg-surface-inset border border-line text-content-muted hover:border-line-strong transition-colors text-left"
+        >
+          <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2" />
+          <span>Search...</span>
+          <kbd className="ml-auto text-[10px] font-mono bg-surface-elevated px-1 rounded">Ctrl+K</kbd>
+        </button>
+
+        {/* Theme toggle */}
+        <div className="flex items-center rounded-md border border-line overflow-hidden mr-1">
+          {themeOptions.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setTheme(id)}
+              title={label}
+              className={`w-7 h-6 flex items-center justify-center transition-colors ${
+                theme === id
+                  ? 'bg-accent text-content-inverse'
+                  : 'text-content-secondary hover:bg-surface-hover'
+              }`}
+            >
+              <Icon size={13} />
+            </button>
+          ))}
         </div>
 
         {/* Action icons */}
         {[HelpCircle, Bell, Settings].map((Icon, i) => (
           <button
             key={i}
-            className="w-8 h-8 flex items-center justify-center rounded-sm transition-colors hover:bg-[#1a1a1a]"
+            className="w-8 h-8 flex items-center justify-center rounded-sm transition-colors hover:bg-surface-hover text-content-secondary"
           >
-            <Icon size={15} style={{ color: 'rgba(255,255,255,0.55)' }} />
+            <Icon size={15} />
           </button>
         ))}
 
         {/* User avatar */}
-        <div
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ml-1"
-          style={{ backgroundColor: '#0078d4', color: 'white' }}
-        >
-          AM
+        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ml-1 bg-accent text-content-inverse" title="Ultron QA">
+          UQ
         </div>
       </div>
     </header>

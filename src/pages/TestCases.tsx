@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useStore } from '../lib/store';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { PriorityBadge } from '../components/ui/PriorityBadge';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, Plus } from 'lucide-react';
+import { TestCaseFormModal } from '../components/ui/modals/TestCaseFormModal';
 import type { TestStatus, TestType, PriorityLevel } from '../lib/types';
 
 export const TestCases: React.FC = () => {
   const { getFilteredTestCases, testSuites, testCaseFilters, setTestCaseFilter, clearTestCaseFilters, navigate } = useStore();
   const cases = getFilteredTestCases();
+  const [showForm, setShowForm] = useState(false);
 
   const getSuiteName = (id: string) => testSuites.find(s => s.id === id)?.name || id;
 
@@ -16,7 +18,7 @@ export const TestCases: React.FC = () => {
       {/* Filters */}
       <div className="flex items-center gap-3 mb-4 flex-wrap">
         <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-content-muted" />
           <input
             className="input pl-8 w-full"
             placeholder="Search by ID or title..."
@@ -50,13 +52,16 @@ export const TestCases: React.FC = () => {
         <button onClick={clearTestCaseFilters} className="btn-ghost text-xs flex items-center gap-1">
           <SlidersHorizontal size={12} /> Clear
         </button>
-        <div className="ml-auto text-xs text-text-muted flex items-center gap-1">
+        <button onClick={() => setShowForm(true)} className="btn-primary text-sm flex items-center gap-1">
+          <Plus size={14} /> New Test Case
+        </button>
+        <div className="ml-auto text-xs text-content-muted flex items-center gap-1">
           <Filter size={12} /> {cases.length} of {useStore.getState().testCases.length} cases
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex-1 overflow-auto border border-border-default">
+      <div className="flex-1 overflow-auto border border-line">
         <table className="w-full">
           <thead className="sticky top-0 z-10">
             <tr>
@@ -73,21 +78,23 @@ export const TestCases: React.FC = () => {
             {cases.map(tc => (
               <tr key={tc.id} className="table-row" onClick={() => navigate('test-case-detail', tc.id)}>
                 <td className="table-cell mono-id">{tc.id}</td>
-                <td className="table-cell text-text-primary">{tc.title}</td>
-                <td className="table-cell text-text-secondary text-xs truncate">{getSuiteName(tc.suiteId)}</td>
+                <td className="table-cell text-content-primary">{tc.title}</td>
+                <td className="table-cell text-content-secondary text-xs truncate">{getSuiteName(tc.suiteId)}</td>
                 <td className="table-cell text-center">
-                  <span className={`text-xs px-2 py-0.5 rounded ${tc.type === 'automated' ? 'bg-azure-blue/10 text-azure-blue' : 'bg-bg-elevated text-text-secondary'}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded ${tc.type === 'automated' ? 'bg-accent/10 text-accent' : 'bg-surface-elevated text-content-secondary'}`}>
                     {tc.type === 'automated' ? 'Auto' : 'Manual'}
                   </span>
                 </td>
                 <td className="table-cell text-center"><PriorityBadge priority={tc.priority} /></td>
                 <td className="table-cell text-center"><StatusBadge status={tc.status} size="sm" /></td>
-                <td className="table-cell text-text-secondary text-xs">{tc.assignedTo}</td>
+                <td className="table-cell text-content-secondary text-xs">{tc.assignedTo}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      <TestCaseFormModal open={showForm} onClose={() => setShowForm(false)} />
     </div>
   );
 };

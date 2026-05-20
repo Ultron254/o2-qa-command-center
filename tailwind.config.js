@@ -7,78 +7,126 @@ export default {
   theme: {
     extend: {
       colors: {
-        /* Azure DevOps Dark Theme Palette */
-        bg: {
-          primary: '#1e1e1e',        /* Main background - rgb(30,30,30) */
-          secondary: '#252526',       /* Cards, panels - rgb(37,37,37) */
-          elevated: '#2d2d2d',        /* Table headers, callouts - rgb(45,45,45) */
-          inset: '#1b1b1b',           /* Inputs, inset areas */
-          hover: '#2a2d2e',           /* Row/item hover */
-          header: '#000000',          /* Top header bar - pure black */
-          sidebar: '#333333',         /* Left sidebar */
+        /* Theme-aware colors via CSS variables (RGB triplets) */
+        surface: {
+          primary: 'rgb(var(--surface-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--surface-secondary) / <alpha-value>)',
+          elevated: 'rgb(var(--surface-elevated) / <alpha-value>)',
+          inset: 'rgb(var(--surface-inset) / <alpha-value>)',
+          hover: 'rgb(var(--surface-hover) / <alpha-value>)',
+          header: 'rgb(var(--surface-header) / <alpha-value>)',
+          sidebar: 'rgb(var(--surface-sidebar) / <alpha-value>)',
+          overlay: 'rgb(var(--surface-overlay) / <alpha-value>)',
         },
-        text: {
-          primary: 'rgba(255,255,255,0.95)',
-          secondary: 'rgba(255,255,255,0.70)',
-          muted: 'rgba(255,255,255,0.45)',
-          inverse: '#1e1e1e',
-          link: '#4fc3f7',            /* Azure link blue */
+        content: {
+          primary: 'rgb(var(--content-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--content-secondary) / <alpha-value>)',
+          muted: 'rgb(var(--content-muted) / <alpha-value>)',
+          inverse: 'rgb(var(--content-inverse) / <alpha-value>)',
+          link: 'rgb(var(--content-link) / <alpha-value>)',
         },
-        border: {
-          default: 'rgba(255,255,255,0.08)',
-          subtle: 'rgba(255,255,255,0.05)',
-          strong: 'rgba(255,255,255,0.14)',
-          focus: '#0078d4',
+        line: {
+          DEFAULT: 'rgb(var(--line-default) / <alpha-value>)',
+          subtle: 'rgb(var(--line-subtle) / <alpha-value>)',
+          strong: 'rgb(var(--line-strong) / <alpha-value>)',
+          focus: 'rgb(var(--line-focus) / <alpha-value>)',
         },
-        /* Azure DevOps Status Colors */
+        accent: {
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          hover: 'rgb(var(--accent-hover) / <alpha-value>)',
+          pressed: 'rgb(var(--accent-pressed) / <alpha-value>)',
+          subtle: 'rgb(var(--accent-subtle) / <alpha-value>)',
+          foreground: 'rgb(var(--accent-foreground) / <alpha-value>)',
+        },
+        /* Fixed colors (same across all themes) */
         status: {
-          pass: '#339933',           /* Green - Passed/Active */
-          'pass-bg': 'rgba(51,153,51,0.12)',
-          fail: '#e81123',           /* Red - Failed */
-          'fail-bg': 'rgba(232,17,35,0.12)',
-          blocked: '#f2c811',        /* Yellow - Blocked/Warning */
-          'blocked-bg': 'rgba(242,200,17,0.12)',
-          skip: '#8a8886',           /* Neutral gray */
-          'skip-bg': 'rgba(138,136,134,0.12)',
-          running: '#0078d4',        /* Azure blue - Running/In Progress */
-          'running-bg': 'rgba(0,120,212,0.12)',
+          pass: '#22C55E',
+          'pass-bg': 'rgba(34,197,94,0.1)',
+          fail: '#EF4444',
+          'fail-bg': 'rgba(239,68,68,0.1)',
+          blocked: '#EAB308',
+          'blocked-bg': 'rgba(234,179,8,0.1)',
+          skip: '#9CA3AF',
+          'skip-bg': 'rgba(156,163,175,0.1)',
+          running: '#3B82F6',
+          'running-bg': 'rgba(59,130,246,0.1)',
         },
-        /* Azure DevOps Priority Colors */
         priority: {
-          critical: '#e81123',       /* Red */
-          high: '#ff8c00',           /* Orange */
-          medium: '#f2c811',         /* Yellow */
-          low: '#8a8886',            /* Gray */
+          critical: '#EF4444',
+          high: '#F97316',
+          medium: '#EAB308',
+          low: '#9CA3AF',
         },
-        /* Azure DevOps Core Accent */
-        azure: {
-          blue: '#0078d4',           /* Primary brand blue */
-          'blue-hover': '#106ebe',   /* Hover state */
-          'blue-pressed': '#005a9e', /* Active/pressed */
-          'blue-light': '#deecf9',   /* Light blue bg */
-          'blue-text': '#4fc3f7',    /* Blue text on dark */
-        },
-        /* Work item type accent bars */
         wit: {
-          epic: '#773b93',           /* Purple - Epics */
-          feature: '#107c41',        /* Green - Features */
-          story: '#0078d4',          /* Blue - User Stories */
-          bug: '#e81123',            /* Red - Bugs */
-          task: '#f2c811',           /* Yellow - Tasks */
+          epic: '#8B5CF6',
+          feature: '#22C55E',
+          story: '#3B82F6',
+          bug: '#EF4444',
+          task: '#EAB308',
+        },
+        oxygene: {
+          DEFAULT: '#F97316',
+          50: '#FFF7ED',
+          100: '#FFEDD5',
+          200: '#FED7AA',
+          300: '#FDBA74',
+          400: '#FB923C',
+          500: '#F97316',
+          600: '#EA580C',
+          700: '#C2410C',
         },
       },
       fontFamily: {
-        body: ['"Segoe UI"', '-apple-system', 'BlinkMacSystemFont', '"Helvetica Neue"', 'sans-serif'],
-        mono: ['"Cascadia Code"', '"Consolas"', '"Courier New"', 'monospace'],
+        sans: ['Inter', '"Segoe UI"', '-apple-system', 'BlinkMacSystemFont', '"Helvetica Neue"', 'sans-serif'],
+        mono: ['"JetBrains Mono"', '"Cascadia Code"', '"Consolas"', 'monospace'],
       },
       boxShadow: {
-        sm: '0 1.6px 3.6px rgba(0,0,0,0.13), 0 0.3px 0.9px rgba(0,0,0,0.10)',
-        md: '0 3.2px 7.2px rgba(0,0,0,0.13), 0 0.6px 1.8px rgba(0,0,0,0.10)',
-        lg: '0 6.4px 14.4px rgba(0,0,0,0.13), 0 1.2px 3.6px rgba(0,0,0,0.10)',
-        callout: '0 2px 4px rgba(0,0,0,0.18), 0 0 2px rgba(0,0,0,0.12)',
+        'xs': '0 1px 2px rgb(var(--shadow-color) / 0.04)',
+        'sm': '0 1px 3px rgb(var(--shadow-color) / 0.06), 0 1px 2px rgb(var(--shadow-color) / 0.04)',
+        'md': '0 4px 6px -1px rgb(var(--shadow-color) / 0.06), 0 2px 4px -2px rgb(var(--shadow-color) / 0.04)',
+        'lg': '0 10px 15px -3px rgb(var(--shadow-color) / 0.06), 0 4px 6px -4px rgb(var(--shadow-color) / 0.04)',
+        'card': '0 1px 3px rgb(var(--shadow-color) / 0.08), 0 1px 2px rgb(var(--shadow-color) / 0.06)',
+        'float': '0 8px 30px rgb(var(--shadow-color) / 0.12)',
       },
       fontSize: {
-        'xxs': '10px',
+        'xxs': ['10px', '14px'],
+      },
+      borderRadius: {
+        'xs': '4px',
+      },
+      keyframes: {
+        'fade-in': {
+          from: { opacity: '0', transform: 'translateY(4px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-up': {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'slide-down': {
+          from: { opacity: '0', transform: 'translateY(-8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'scale-in': {
+          from: { opacity: '0', transform: 'scale(0.95)' },
+          to: { opacity: '1', transform: 'scale(1)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        'pulse-dot': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.4' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.2s ease-out',
+        'slide-up': 'slide-up 0.25s ease-out',
+        'slide-down': 'slide-down 0.25s ease-out',
+        'scale-in': 'scale-in 0.15s ease-out',
+        'shimmer': 'shimmer 1.5s ease-in-out infinite',
+        'pulse-dot': 'pulse-dot 1.5s ease-in-out infinite',
       },
     },
   },

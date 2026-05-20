@@ -1,14 +1,37 @@
 import React from 'react';
 import type { TestStatus } from '../../lib/types';
 
-/* Azure DevOps status styling */
-const statusConfig: Record<TestStatus, { label: string; color: string; bg: string; border: string }> = {
-  pass: { label: 'Passed', color: '#339933', bg: 'rgba(51,153,51,0.12)', border: '#339933' },
-  fail: { label: 'Failed', color: '#e81123', bg: 'rgba(232,17,35,0.12)', border: '#e81123' },
-  blocked: { label: 'Blocked', color: '#f2c811', bg: 'rgba(242,200,17,0.12)', border: '#f2c811' },
-  skip: { label: 'Skipped', color: '#8a8886', bg: 'rgba(138,136,134,0.12)', border: '#8a8886' },
-  not_run: { label: 'Not Run', color: 'rgba(255,255,255,0.45)', bg: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.15)' },
-  running: { label: 'Running', color: '#0078d4', bg: 'rgba(0,120,212,0.12)', border: '#0078d4' },
+const statusConfig: Record<TestStatus, { label: string; dotClass: string; badgeClass: string }> = {
+  pass: {
+    label: 'Passed',
+    dotClass: 'bg-status-pass',
+    badgeClass: 'text-status-pass bg-status-pass/12 border-status-pass/12',
+  },
+  fail: {
+    label: 'Failed',
+    dotClass: 'bg-status-fail',
+    badgeClass: 'text-status-fail bg-status-fail/12 border-status-fail/12',
+  },
+  blocked: {
+    label: 'Blocked',
+    dotClass: 'bg-status-blocked',
+    badgeClass: 'text-status-blocked bg-status-blocked/12 border-status-blocked/12',
+  },
+  skip: {
+    label: 'Skipped',
+    dotClass: 'bg-status-skip',
+    badgeClass: 'text-status-skip bg-status-skip/12 border-status-skip/12',
+  },
+  not_run: {
+    label: 'Not Run',
+    dotClass: 'bg-content-muted',
+    badgeClass: 'text-content-muted bg-surface-elevated border-line-subtle',
+  },
+  running: {
+    label: 'Running',
+    dotClass: 'bg-accent',
+    badgeClass: 'text-accent bg-accent/12 border-accent/12',
+  },
 };
 
 interface StatusBadgeProps {
@@ -22,18 +45,10 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md' })
 
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-sm font-normal"
-      style={{
-        backgroundColor: cfg.bg,
-        color: cfg.color,
-        padding: isSmall ? '1px 6px' : '2px 8px',
-        fontSize: isSmall ? '11px' : '12px',
-        border: `1px solid ${cfg.bg}`,
-      }}
+      className={`inline-flex items-center gap-1.5 rounded-sm font-normal border ${cfg.badgeClass} ${isSmall ? 'px-1.5 py-px text-[11px]' : 'px-2 py-0.5 text-xs'}`}
     >
       <span
-        className={`inline-block rounded-full ${status === 'running' ? 'pulse-dot' : ''}`}
-        style={{ width: isSmall ? '5px' : '6px', height: isSmall ? '5px' : '6px', backgroundColor: cfg.color }}
+        className={`inline-block rounded-full ${cfg.dotClass} ${status === 'running' ? 'pulse-dot' : ''} ${isSmall ? 'w-[5px] h-[5px]' : 'w-1.5 h-1.5'}`}
       />
       {cfg.label}
     </span>

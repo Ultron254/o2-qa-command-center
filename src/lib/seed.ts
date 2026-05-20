@@ -14,9 +14,7 @@ export const environments: Environment[] = [
 
 // ---- Team ----
 export const teamMembers: TeamMember[] = [
-  { id: 'tm-001', name: 'Ultron', role: 'lead', email: 'ultron@oxygene.co.ke', productsAssigned: ['prod-msit'], active: true },
-  { id: 'tm-002', name: 'Sarah Wanjiku', role: 'tester', email: 'sarah.w@oxygene.co.ke', productsAssigned: ['prod-msit'], active: true },
-  { id: 'tm-003', name: 'James Ochieng', role: 'tester', email: 'james.o@oxygene.co.ke', productsAssigned: ['prod-msit'], active: true },
+  { id: 'tm-001', name: 'Ultron QA', role: 'lead', email: 'ultron@oxygene.co.ke', productsAssigned: ['prod-msit'], active: true },
 ];
 
 // ---- Test Suites ----
@@ -43,7 +41,7 @@ export const testPlans: TestPlan[] = [
     productId: 'prod-msit',
     environmentId: 'env-prod',
     status: 'active',
-    assignedTesters: ['tm-001', 'tm-002', 'tm-003'],
+    assignedTesters: ['tm-001'],
     suiteIds: testSuites.map(s => s.id),
     startDate: '2026-04-01',
     endDate: '2026-06-01',
@@ -55,20 +53,20 @@ export const testPlans: TestPlan[] = [
 
 // ---- Activity Feed ----
 export const activityFeed: ActivityEntry[] = [
-  { id: 'act-01', timestamp: '2026-05-18T14:30:00Z', user: 'Sarah Wanjiku', action: 'run_completed', description: 'Completed Smoke Tests run -- 7/8 passed', itemId: 'run-001', itemType: 'test_run' },
-  { id: 'act-02', timestamp: '2026-05-18T13:15:00Z', user: 'James Ochieng', action: 'defect_logged', description: 'Logged DEF-003: Quadrant map dots overlap at boundary values', itemId: 'DEF-003', itemType: 'defect' },
+  { id: 'act-01', timestamp: '2026-05-18T14:30:00Z', user: 'Ultron QA', action: 'run_completed', description: 'Completed Smoke Tests run -- 7/8 passed', itemId: 'run-001', itemType: 'test_run' },
+  { id: 'act-02', timestamp: '2026-05-18T13:15:00Z', user: 'Ultron QA', action: 'defect_logged', description: 'Logged DEF-003: Quadrant map dots overlap at boundary values', itemId: 'DEF-003', itemType: 'defect' },
   { id: 'act-03', timestamp: '2026-05-18T11:00:00Z', user: 'Ultron', action: 'case_updated', description: 'Updated TC-UNIT-006 expected result to 74.00', itemId: 'TC-UNIT-006', itemType: 'test_case' },
-  { id: 'act-04', timestamp: '2026-05-17T16:45:00Z', user: 'Sarah Wanjiku', action: 'run_completed', description: 'Completed Scoring Engine unit tests -- 22/22 passed', itemId: 'run-002', itemType: 'test_run' },
-  { id: 'act-05', timestamp: '2026-05-17T14:20:00Z', user: 'James Ochieng', action: 'defect_resolved', description: 'Resolved DEF-001: SIS calculation rounding error', itemId: 'DEF-001', itemType: 'defect' },
+  { id: 'act-04', timestamp: '2026-05-17T16:45:00Z', user: 'Ultron QA', action: 'run_completed', description: 'Completed Scoring Engine unit tests -- 22/22 passed', itemId: 'run-002', itemType: 'test_run' },
+  { id: 'act-05', timestamp: '2026-05-17T14:20:00Z', user: 'Ultron QA', action: 'defect_resolved', description: 'Resolved DEF-001: SIS calculation rounding error', itemId: 'DEF-001', itemType: 'defect' },
   { id: 'act-06', timestamp: '2026-05-17T10:30:00Z', user: 'Ultron', action: 'plan_created', description: 'Created MSIT v1 Production Readiness plan', itemId: 'plan-001', itemType: 'test_plan' },
-  { id: 'act-07', timestamp: '2026-05-16T15:00:00Z', user: 'Sarah Wanjiku', action: 'case_created', description: 'Created 8 new security test cases', itemId: 'TC-SEC-001', itemType: 'test_case' },
-  { id: 'act-08', timestamp: '2026-05-16T11:30:00Z', user: 'James Ochieng', action: 'run_completed', description: 'Completed API tests run -- 10/12 passed', itemId: 'run-003', itemType: 'test_run' },
+  { id: 'act-07', timestamp: '2026-05-16T15:00:00Z', user: 'Ultron QA', action: 'case_created', description: 'Created 8 new security test cases', itemId: 'TC-SEC-001', itemType: 'test_case' },
+  { id: 'act-08', timestamp: '2026-05-16T11:30:00Z', user: 'Ultron QA', action: 'run_completed', description: 'Completed API tests run -- 10/12 passed', itemId: 'run-003', itemType: 'test_run' },
   { id: 'act-09', timestamp: '2026-05-15T16:00:00Z', user: 'Ultron', action: 'defect_logged', description: 'Logged DEF-005: Redis cache not invalidating on config change', itemId: 'DEF-005', itemType: 'defect' },
-  { id: 'act-10', timestamp: '2026-05-15T13:00:00Z', user: 'Sarah Wanjiku', action: 'test_run', description: 'Started UI Page Rendering test run', itemId: 'run-004', itemType: 'test_run' },
-  { id: 'act-11', timestamp: '2026-05-14T17:30:00Z', user: 'James Ochieng', action: 'case_updated', description: 'Updated TC-FLOW-001 steps with new modal fields', itemId: 'TC-FLOW-001', itemType: 'test_case' },
+  { id: 'act-10', timestamp: '2026-05-15T13:00:00Z', user: 'Ultron QA', action: 'test_run', description: 'Started UI Page Rendering test run', itemId: 'run-004', itemType: 'test_run' },
+  { id: 'act-11', timestamp: '2026-05-14T17:30:00Z', user: 'Ultron QA', action: 'case_updated', description: 'Updated TC-FLOW-001 steps with new modal fields', itemId: 'TC-FLOW-001', itemType: 'test_case' },
   { id: 'act-12', timestamp: '2026-05-14T10:00:00Z', user: 'Ultron', action: 'run_completed', description: 'Completed Integration tests -- 6/8 passed', itemId: 'run-005', itemType: 'test_run' },
-  { id: 'act-13', timestamp: '2026-05-13T14:00:00Z', user: 'Sarah Wanjiku', action: 'defect_logged', description: 'Logged DEF-007: Watchlist signal pulsing animation missing', itemId: 'DEF-007', itemType: 'defect' },
-  { id: 'act-14', timestamp: '2026-05-13T09:00:00Z', user: 'James Ochieng', action: 'case_created', description: 'Created 6 cross-browser compatibility cases', itemId: 'TC-COMPAT-001', itemType: 'test_case' },
+  { id: 'act-13', timestamp: '2026-05-13T14:00:00Z', user: 'Ultron QA', action: 'defect_logged', description: 'Logged DEF-007: Watchlist signal pulsing animation missing', itemId: 'DEF-007', itemType: 'defect' },
+  { id: 'act-14', timestamp: '2026-05-13T09:00:00Z', user: 'Ultron QA', action: 'case_created', description: 'Created 6 cross-browser compatibility cases', itemId: 'TC-COMPAT-001', itemType: 'test_case' },
   { id: 'act-15', timestamp: '2026-05-12T16:00:00Z', user: 'Ultron', action: 'test_run', description: 'Started Performance test suite run', itemId: 'run-006', itemType: 'test_run' },
 ];
 
