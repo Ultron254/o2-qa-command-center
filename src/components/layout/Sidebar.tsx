@@ -54,6 +54,7 @@ const navGroups: NavGroup[] = [
     icon: ShieldAlert,
     items: [
       { id: 'qa-findings', label: 'QA Findings' },
+      { id: 'website-findings', label: 'Website Findings' },
     ],
   },
   {

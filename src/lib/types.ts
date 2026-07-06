@@ -47,7 +47,8 @@ export type PageId =
   | 'products'
   | 'environments'
   | 'team'
-  | 'qa-findings';
+  | 'qa-findings'
+  | 'website-findings';
 
 // ----- Core Entities -----
 

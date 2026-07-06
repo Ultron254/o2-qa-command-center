@@ -24,6 +24,7 @@ from openpyxl.utils import get_column_letter
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
 DATA = os.path.join(HERE, "qa-findings.json")
+WEB_DATA = os.path.join(HERE, "website-findings.json")
 OUT = os.path.join(ROOT, "wrike-import.xlsx")
 
 # Map severities to Wrike's 3-level Importance field.
@@ -125,6 +126,75 @@ def write_sheet(ws, findings):
             cell.alignment = WRAP_TOP
 
 
+# ---------------------------------------------------------------------------
+# Website findings (live-site E2E QA) — different shape from repo findings:
+# site / page / category / screenshot instead of product / repo / branch.
+# ---------------------------------------------------------------------------
+WEB_COLUMNS = [
+    ("Title", 58),
+    ("Location", 46),
+    ("Severity", 11),
+    ("Importance", 11),
+    ("Status", 10),
+    ("Site", 8),
+    ("Category", 15),
+    ("Page", 34),
+    ("Finding ID", 15),
+    ("Screenshot", 34),
+    ("Identified Issue / Details", 100),
+]
+
+
+def build_web_description(f: dict) -> str:
+    return (
+        f">> IDENTIFIED ISSUE / HOW TO REPRODUCE\n{f['issue']}\n"
+        f"\n"
+        f">> WHERE (page / element)\n{f['page']}  |  {f['location']}\n"
+        f"\n"
+        f">> EXPECTED RESULT\n{f['expected']}\n"
+        f"\n"
+        f">> CURRENT RESULT\n{f['actual']}\n"
+        f"\n"
+        f">> SCREENSHOT EVIDENCE\n{f['screenshot']}\n"
+        f"\n"
+        f"----------------------------------------\n"
+        f"Severity: {f['severity'].upper()}  |  Site: {f['site']}  |  "
+        f"Category: {f['category']}  |  Ref: {f['id']}"
+    )
+
+
+def write_web_sheet(ws, findings):
+    ws.append([c[0] for c in WEB_COLUMNS])
+    for i, (name, width) in enumerate(WEB_COLUMNS, start=1):
+        col = get_column_letter(i)
+        ws.column_dimensions[col].width = width
+        cell = ws.cell(row=1, column=i)
+        cell.fill = HEADER_FILL
+        cell.font = HEADER_FONT
+        cell.alignment = Alignment(vertical="center")
+    ws.freeze_panes = "A2"
+
+    order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
+    for f in sorted(findings, key=lambda x: (order.get(x["severity"], 9), x["id"])):
+        ws.append([
+            f"ISSUE | {f['title']}",
+            f["location"],
+            f["severity"].capitalize(),
+            IMPORTANCE.get(f["severity"], "Normal"),
+            "New",
+            f["site"],
+            f["category"],
+            f["page"],
+            f["id"],
+            f["screenshot"],
+            build_web_description(f),
+        ])
+
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        for cell in row:
+            cell.alignment = WRAP_TOP
+
+
 def main():
     with open(DATA, encoding="utf-8") as fh:
         payload = json.load(fh)
@@ -139,11 +209,28 @@ def main():
         ws = wb.create_sheet(product)
         write_sheet(ws, [f for f in findings if f["product"] == product])
 
-    wb.save(OUT)
+    # Website findings sheet(s)
+    web_count = 0
+    if os.path.exists(WEB_DATA):
+        with open(WEB_DATA, encoding="utf-8") as fh:
+            web_payload = json.load(fh)
+        web_findings = web_payload["websiteFindings"]
+        web_count = len(web_findings)
+        write_web_sheet(wb.create_sheet("Website"), web_findings)
+
+    out_path = OUT
+    try:
+        wb.save(OUT)
+    except PermissionError:
+        import time
+        out_path = os.path.join(ROOT, f"wrike-import-{time.strftime('%Y%m%d-%H%M%S')}.xlsx")
+        wb.save(out_path)
+        print(f"[warn] {OUT} is locked (open in Excel?). Saved to {out_path} instead.")
+
     counts = ", ".join(
         f"{sum(1 for f in findings if f['product'] == p)} {p}" for p in products
     )
-    print(f"Wrote {len(findings)} findings ({counts}) -> {OUT}")
+    print(f"Wrote {len(findings)} repo findings ({counts}) + {web_count} website findings -> {out_path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,221 @@
+{
+  "websiteAuditMeta": {
+    "auditedOn": "2026-07-07",
+    "method": "Playwright automated crawl (console/JS errors, HTTP status, broken images/links, a11y & SEO checks, mobile overflow) + agentic desktop/mobile walkthrough. Read-only; no data submitted; no production load testing.",
+    "sitesTested": 2,
+    "pagesCrawled": 40
+  },
+  "websiteSummaries": [
+    {
+      "site": "NBK",
+      "url": "https://nbk.oxygenehosting.com/",
+      "stack": "Joomla CMS (template: nbk_rebranded), jQuery, DataTables",
+      "pagesCrawled": 20,
+      "testRun": "All pages HTTP 200; 1 uncaught JS error on EVERY page (main.js:400); 2 broken links; misspelled account URLs; homepage missing meta description; unlabeled search inputs."
+    },
+    {
+      "site": "NDSI",
+      "url": "https://demo.oxygenehosting.com/ndsi/",
+      "stack": "WordPress (custom theme, Bootstrap modals)",
+      "pagesCrawled": 20,
+      "testRun": "0 JS errors; 1 broken page (/ndsi/join); meta description missing on all 20 pages; broken heading structure; broken modal image; mobile overflow on articles; dead resource links; unlabeled forms; tabnabbing links."
+    }
+  ],
+  "websiteFindings": [
+    {
+      "id": "WEB-NBK-01",
+      "site": "NBK",
+      "page": "All pages (site-wide)",
+      "category": "Functional",
+      "severity": "high",
+      "title": "Uncaught JavaScript error on every page (addEventListener on null)",
+      "issue": "Every single page throws an uncaught exception during load. Reproduce: 1) Open any page, e.g. the homepage https://nbk.oxygenehosting.com/. 2) Open DevTools → Console. 3) Observe \"Uncaught TypeError: Cannot read properties of null (reading 'addEventListener')\" originating from /templates/nbk_rebranded/js/main.js:400. The script calls document.querySelector(...) for an element that does not exist on the page and then calls .addEventListener on the null result. Confirmed on all 20 pages crawled (100%).",
+      "actual": "The exception aborts execution of main.js at line 400. Any initialisation defined AFTER that line (menu behaviour, sliders, scroll effects, toggles) silently fails to bind — on every page of the site.",
+      "expected": "main.js must null-check the target before binding, e.g. const el = document.querySelector(sel); if (el) el.addEventListener(...). Console should be error-free on every page.",
+      "location": "templates/nbk_rebranded/js/main.js:400",
+      "screenshot": "website-findings/nbk-js-error.png"
+    },
+    {
+      "id": "WEB-NBK-02",
+      "site": "NBK",
+      "page": "Open an Account → Current Account pages",
+      "category": "Content",
+      "severity": "medium",
+      "title": "Misspelled URL slug \"acocunt\" on account pages (bank-facing typo)",
+      "issue": "The Current Account section is served under a misspelled path segment. Reproduce: 1) Hover/click For You → Open an Account → Personal Current Account. 2) The address bar shows /for-you/open-an-account/current-acocunt/personal-current-acocunt — \"acocunt\" instead of \"account\". The typo appears in both the parent (\"current-acocunt\") and child (\"personal-current-acocunt\") slugs and is present in the live navigation links.",
+      "actual": "Misspelled, publicly-visible, indexable URLs are shipped on a bank website. They appear in the address bar, in shared links, and in search-engine results.",
+      "expected": "Correct the slugs to .../current-account/personal-current-account and add 301 redirects from the old typo'd URLs so existing/shared links keep working.",
+      "location": "Joomla menu alias for the Current Account section",
+      "screenshot": "website-findings/nbk-url-typo.png"
+    },
+    {
+      "id": "WEB-NBK-03",
+      "site": "NBK",
+      "page": "Ways of Banking → NBK EPAY",
+      "category": "Functional",
+      "severity": "medium",
+      "title": "Primary menu link \"NBK EPAY\" is dead (403 → \"Page not found\")",
+      "issue": "A main navigation item leads to an error page. Reproduce: 1) Open Ways of Banking → NBK EPAY, or go directly to https://nbk.oxygenehosting.com/ways-of-banking/nbk-epay. 2) The server responds with HTTP 403 Forbidden while the browser renders the site's \"Page not found\" screen.",
+      "actual": "Users who click a promoted menu item land on a \"Page not found\" page. The HTTP status (403) does not even match the rendered message (404), which will also confuse crawlers.",
+      "expected": "The EPAY page should load (HTTP 200) with real content, or the menu item should be removed until it is ready. The status code must match the page shown.",
+      "location": "Menu item \"NBK EPAY\" → /ways-of-banking/nbk-epay",
+      "screenshot": "website-findings/nbk-epay-403.png"
+    },
+    {
+      "id": "WEB-NBK-04",
+      "site": "NBK",
+      "page": "Footer (all pages)",
+      "category": "Security",
+      "severity": "medium",
+      "title": "Footer social link is insecure (http://) and broken",
+      "issue": "The footer \"Twitter/X\" icon links to an insecure, failing URL. Reproduce: 1) Scroll to the footer on any page. 2) Inspect the Twitter icon anchor — href=\"http://www.twitter.com/National_Bank\". 3) The request over plain HTTP fails (returns an error/blocked response). It also uses the deprecated twitter.com host.",
+      "actual": "An insecure http:// outbound link on an HTTPS bank site that errors out; uses an outdated domain and an unverified handle.",
+      "expected": "Use https:// (ideally https://x.com/<verified-handle>), open in a new tab with rel=\"noopener noreferrer\", and confirm the handle is correct.",
+      "location": "Footer → social media links",
+      "screenshot": "website-findings/nbk-twitter.png"
+    },
+    {
+      "id": "WEB-NBK-05",
+      "site": "NBK",
+      "page": "Homepage",
+      "category": "SEO",
+      "severity": "medium",
+      "title": "Homepage has no meta description",
+      "issue": "The bank's primary landing page ships without a meta description. Reproduce: 1) Open the homepage. 2) View source / inspect <head>. 3) There is no <meta name=\"description\"> element.",
+      "actual": "Search engines auto-generate an uncontrolled snippet for the most important page on the site, weakening click-through from search results.",
+      "expected": "Add a unique, 150–160 character meta description to the homepage (and to all key landing pages).",
+      "location": "<head> of the homepage",
+      "screenshot": "website-findings/nbk-meta-desc.png"
+    },
+    {
+      "id": "WEB-NBK-06",
+      "site": "NBK",
+      "page": "Header & footer search",
+      "category": "Accessibility",
+      "severity": "medium",
+      "title": "Search inputs have no accessible label (WCAG 1.3.1 / 4.1.2)",
+      "issue": "Both search fields rely on a placeholder only. Reproduce: 1) Inspect the header search input (#mod-search-searchword107) and the footer search input (#sitesearchfooter). 2) Neither has an associated <label>, aria-label, or aria-labelledby — only a placeholder (\"Search..\" / \"I am looking for...\").",
+      "actual": "Screen readers announce an unlabeled edit field. Placeholder text is not a valid accessible name, so the control fails WCAG 2.1 SC 1.3.1 and 4.1.2.",
+      "expected": "Associate a <label> with each input or add aria-label=\"Search\". Placeholder may remain as a hint only.",
+      "location": "Header/footer search modules (#mod-search-searchword107, #sitesearchfooter)",
+      "screenshot": "website-findings/nbk-search-a11y.png"
+    },
+    {
+      "id": "WEB-NDSI-01",
+      "site": "NDSI",
+      "page": "/ndsi/join",
+      "category": "Functional",
+      "severity": "high",
+      "title": "Broken/orphaned page: /ndsi/join renders no header, nav, content or footer",
+      "issue": "A live, linkable URL renders an unusable page. Reproduce: 1) Open https://demo.oxygenehosting.com/ndsi/join. 2) The page returns HTTP 200 but shows only a full-bleed background image (a dam) on a black canvas — no header, no navigation menu, no body content, no footer. There is no way to navigate away. The real membership page is /ndsi/join-the-movement.",
+      "actual": "Users who reach /ndsi/join hit a dead end with no chrome and no content — it looks completely broken. (The page also has no <html lang> and its only <img> has no alt text.)",
+      "expected": "Either 301-redirect /ndsi/join to /ndsi/join-the-movement, or render the full site template with real content. No orphaned/blank pages should be publicly reachable.",
+      "location": "/ndsi/join (orphaned WordPress page/template)",
+      "screenshot": "website-findings/ndsi-join-broken.png"
+    },
+    {
+      "id": "WEB-NDSI-02",
+      "site": "NDSI",
+      "page": "All pages (site-wide)",
+      "category": "SEO",
+      "severity": "high",
+      "title": "No meta description on any page (site-wide SEO gap)",
+      "issue": "None of the 20 pages crawled has a meta description. Reproduce: 1) Open any page (home, About, Resources, an article…). 2) Inspect <head> — there is no <meta name=\"description\">. Confirmed missing on 20/20 pages.",
+      "actual": "For a site whose core goal is recruiting signatories, no page controls its search-result snippet, so organic discoverability and click-through suffer.",
+      "expected": "Add unique, descriptive meta descriptions per page (e.g. via Yoast/RankMath or the theme head), especially the homepage, About, and membership pages.",
+      "location": "<head> across all page templates",
+      "screenshot": "website-findings/ndsi-meta-desc.png"
+    },
+    {
+      "id": "WEB-NDSI-03",
+      "site": "NDSI",
+      "page": "Most pages (headings)",
+      "category": "SEO",
+      "severity": "high",
+      "title": "Broken heading structure: missing H1 on most pages, 9× H1 on homepage",
+      "issue": "The document outline is inconsistent across the site. Reproduce: run an accessibility/SEO audit (axe / Lighthouse) or inspect the heading outline. Findings: About, How We Work, Action Points, News, Events, Resources, Contact and ALL article pages have NO <h1>; the homepage has 9 <h1> elements; the About page has 2 <h1>.",
+      "actual": "Most pages provide no primary heading for search engines / assistive tech, while the homepage has nine competing top-level headings. Poor semantics for both SEO and screen-reader navigation.",
+      "expected": "Exactly one meaningful <h1> per page reflecting that page's title; all other headings demoted to <h2>/<h3> in a logical order.",
+      "location": "Page/section header templates (hero + section titles)",
+      "screenshot": "website-findings/ndsi-headings.png"
+    },
+    {
+      "id": "WEB-NDSI-04",
+      "site": "NDSI",
+      "page": "How We Work → Leadership modal",
+      "category": "Functional",
+      "severity": "medium",
+      "title": "Broken leadership profile image inside the bio modal",
+      "issue": "A leadership member's bio modal contains a broken image. Reproduce: 1) Open How We Work. 2) Click a leadership member card to open their bio modal. 3) The circular profile <img class=\"modal-title img-fluid rounded-circle\"> has an empty src, so the browser resolves it to the page URL (/ndsi/how-we-work/) and shows the broken-image placeholder.",
+      "actual": "The profile photo in the leadership bio modal is broken (empty src → page URL), leaving a broken-image icon where the leader's picture should be.",
+      "expected": "Populate the modal <img> with the correct profile image URL (with alt text), or remove the empty <img> if unused.",
+      "location": "How We Work leadership bio modal (img.rounded-circle, empty src)",
+      "screenshot": "website-findings/ndsi-modal-image.png"
+    },
+    {
+      "id": "WEB-NDSI-05",
+      "site": "NDSI",
+      "page": "News / article pages",
+      "category": "Responsive",
+      "severity": "medium",
+      "title": "Horizontal scroll on mobile (content wider than the viewport)",
+      "issue": "Article pages overflow horizontally on phones. Reproduce: 1) Open an article, e.g. \"Old Mutual and Prudential Africa join sustainable insurance initiative\". 2) Set the viewport to 390px wide (e.g. DevTools iPhone 12). 3) The document is 446px wide inside the 390px viewport (~56px overflow) and the page scrolls sideways.",
+      "actual": "Users can swipe the page left/right on mobile; a fixed-width element (image/embed/quote) breaks the responsive layout and content is clipped.",
+      "expected": "Constrain content to the viewport (max-width:100%; responsive images/embeds; no fixed pixel widths). document.scrollWidth should equal the viewport width — no horizontal scroll.",
+      "location": "Single-post (article) template",
+      "screenshot": "website-findings/ndsi-mobile-overflow.png"
+    },
+    {
+      "id": "WEB-NDSI-06",
+      "site": "NDSI",
+      "page": "Resources",
+      "category": "Functional",
+      "severity": "medium",
+      "title": "Dead links on the Resources page (17 empty href=\"#\" links)",
+      "issue": "The Resources page contains many links that go nowhere. Reproduce: 1) Open Resources. 2) Switch between the Blog / Video Gallery / Press Release / Report tabs and click items. 3) 17 anchors on the page have an empty or \"#\" href, so clicking performs no navigation and no download.",
+      "actual": "Clicking these resource items/tabs does nothing — users cannot open the videos, press releases, reports or downloads they advertise.",
+      "expected": "Wire each item to its real resource URL or file (open/download), or hide tabs/items that have no content yet.",
+      "location": "Resources tabbed lists (Blog / Video Gallery / Press Release / Report)",
+      "screenshot": "website-findings/ndsi-dead-resources.png"
+    },
+    {
+      "id": "WEB-NDSI-07",
+      "site": "NDSI",
+      "page": "Join the Movement / Contact forms",
+      "category": "Accessibility",
+      "severity": "medium",
+      "title": "Form inputs have no labels; membership page has no H1",
+      "issue": "Key conversion forms are not accessible. Reproduce: 1) Open Join the Movement and inspect the form — 6 inputs have no associated <label>/aria-label. 2) Open Contact Us — 1 input is unlabeled. 3) The Join the Movement page also has no <h1>.",
+      "actual": "Screen readers cannot announce what each field is for (fails WCAG 1.3.1 / 3.3.2 / 4.1.2), which hurts exactly the flows the site needs most — signing up members.",
+      "expected": "Give every input a visible <label> (or aria-label) programmatically associated with it, and add one <h1> to the membership page.",
+      "location": "Join the Movement form (6 inputs) + Contact form (1 input)",
+      "screenshot": "website-findings/ndsi-form-a11y.png"
+    },
+    {
+      "id": "WEB-NDSI-08",
+      "site": "NDSI",
+      "page": "Events + external links (site-wide)",
+      "category": "Security",
+      "severity": "low",
+      "title": "target=\"_blank\" links missing rel=\"noopener\" (reverse tabnabbing)",
+      "issue": "New-tab links do not protect the opener. Reproduce: inspect links that open in a new tab. The Events page has 26 target=\"_blank\" anchors with no rel=\"noopener\" (plus ~2 on most other pages).",
+      "actual": "The newly-opened page can access window.opener and could navigate the original tab to a malicious URL (reverse tabnabbing); there is also a small performance cost.",
+      "expected": "Add rel=\"noopener noreferrer\" to every target=\"_blank\" link.",
+      "location": "Events listing links + sitewide external links",
+      "screenshot": "website-findings/ndsi-tabnabbing.png"
+    },
+    {
+      "id": "WEB-NDSI-09",
+      "site": "NDSI",
+      "page": "News / Resources outbound link",
+      "category": "Content",
+      "severity": "low",
+      "title": "Dead external reference link (404)",
+      "issue": "An outbound reference link is broken. Reproduce: follow the external link that points to https://newafricanmagazine.com/27373/ from the news/resources content. The target returns HTTP 404 Not Found.",
+      "actual": "Users who click the citation reach a \"not found\" page on the external site — a broken reference that undermines credibility.",
+      "expected": "Update the link to the correct article URL or remove it; add periodic external-link checking.",
+      "location": "Outbound link → newafricanmagazine.com/27373/",
+      "screenshot": "website-findings/ndsi-broken-extlink.png"
+    }
+  ]
+}

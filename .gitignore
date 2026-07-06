@@ -27,3 +27,11 @@ dist-ssr
 *.sw?
 
 .vercel
+
+# Python
+__pycache__/
+*.pyc
+
+# Excel lock / timestamped fallback files
+~$*.xlsx
+wrike-import-*.xlsx

@@ -20,6 +20,7 @@ const pageTitles: Record<PageId, string> = {
   'environments': 'Environments',
   'team': 'Team',
   'qa-findings': 'QA Findings',
+  'website-findings': 'Website Findings',
 };
 
 const themeOptions: { id: ThemeId; icon: React.ElementType; label: string }[] = [
