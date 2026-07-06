@@ -46,7 +46,8 @@ export type PageId =
   | 'trend-reports'
   | 'products'
   | 'environments'
-  | 'team';
+  | 'team'
+  | 'qa-findings';
 
 // ----- Core Entities -----
 

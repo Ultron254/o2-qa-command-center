@@ -2,7 +2,7 @@ import React from 'react';
 import { useStore } from '../../lib/store';
 import type { PageId } from '../../lib/types';
 import {
-  LayoutDashboard, Play, TrendingUp, ChevronDown, Beaker, Settings
+  LayoutDashboard, Play, TrendingUp, ChevronDown, Beaker, Settings, ShieldAlert
 } from 'lucide-react';
 
 interface NavItem {
@@ -47,6 +47,13 @@ const navGroups: NavGroup[] = [
     items: [
       { id: 'coverage-matrix', label: 'Coverage' },
       { id: 'trend-reports', label: 'Progress Report' },
+    ],
+  },
+  {
+    title: 'QA Audit',
+    icon: ShieldAlert,
+    items: [
+      { id: 'qa-findings', label: 'QA Findings' },
     ],
   },
   {

@@ -19,6 +19,7 @@ const TrendReports = lazy(() => import('./pages/TrendReports').then(m => ({ defa
 const Products = lazy(() => import('./pages/Products').then(m => ({ default: m.Products })));
 const Environments = lazy(() => import('./pages/Environments').then(m => ({ default: m.Environments })));
 const Team = lazy(() => import('./pages/Team').then(m => ({ default: m.Team })));
+const QAFindings = lazy(() => import('./pages/QAFindings').then(m => ({ default: m.QAFindings })));
 
 const pageComponents: Record<PageId, React.LazyExoticComponent<React.FC>> = {
   'dashboard': Dashboard,
@@ -35,6 +36,7 @@ const pageComponents: Record<PageId, React.LazyExoticComponent<React.FC>> = {
   'products': Products,
   'environments': Environments,
   'team': Team,
+  'qa-findings': QAFindings,
 };
 
 const PageSkeleton: React.FC = () => (
