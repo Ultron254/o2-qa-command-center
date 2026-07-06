@@ -26,6 +26,12 @@ const severityDot: Record<QASeverity, string> = {
   info: 'bg-content-muted',
 };
 
+const productBadge: Record<QAProduct, string> = {
+  MSIT: 'bg-accent/10 text-accent',
+  IMT: 'bg-oxygene/10 text-oxygene',
+  DRM: 'bg-wit-epic/10 text-wit-epic',
+};
+
 const SeverityPill: React.FC<{ severity: QASeverity }> = ({ severity }) => (
   <span className={`text-[10px] px-2 py-0.5 rounded font-semibold uppercase tracking-wide border ${severityStyles[severity]}`}>
     {severity}
@@ -77,7 +83,8 @@ export const QAFindings: React.FC = () => {
     qaFindings.forEach(f => { bySeverity[f.severity]++; });
     const msit = qaFindings.filter(f => f.product === 'MSIT').length;
     const imt = qaFindings.filter(f => f.product === 'IMT').length;
-    return { bySeverity, msit, imt };
+    const drm = qaFindings.filter(f => f.product === 'DRM').length;
+    return { bySeverity, msit, imt, drm };
   }, []);
 
   const toggle = (id: string) =>
@@ -112,14 +119,15 @@ export const QAFindings: React.FC = () => {
         </div>
 
         {/* Summary stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          <StatCard label="Total" value={qaFindings.length} sub={`${counts.msit} MSIT · ${counts.imt} IMT`} />
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+          <StatCard label="Total" value={qaFindings.length} sub={`${counts.msit} MSIT · ${counts.imt} IMT · ${counts.drm} DRM`} />
           <StatCard label="Critical" value={counts.bySeverity.critical} accent="text-status-fail" />
           <StatCard label="High" value={counts.bySeverity.high} accent="text-oxygene" />
           <StatCard label="Medium" value={counts.bySeverity.medium} accent="text-status-blocked" />
           <StatCard label="Low" value={counts.bySeverity.low} accent="text-accent" />
           <StatCard label="MSIT" value={counts.msit} sub="4 services" />
           <StatCard label="IMT" value={counts.imt} sub="2 services" />
+          <StatCard label="DRM" value={counts.drm} sub="1 service" />
         </div>
 
         {/* Service / environment summary */}
@@ -150,7 +158,7 @@ export const QAFindings: React.FC = () => {
                     <tr key={s.repo} className="border-t border-line">
                       <td className="table-cell mono-id whitespace-nowrap">{s.repo}</td>
                       <td className="table-cell">
-                        <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${s.product === 'MSIT' ? 'bg-accent/10 text-accent' : 'bg-oxygene/10 text-oxygene'}`}>
+                        <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${productBadge[s.product]}`}>
                           {s.product}
                         </span>
                       </td>
@@ -180,6 +188,7 @@ export const QAFindings: React.FC = () => {
             <option value="">All Products</option>
             <option value="MSIT">MSIT</option>
             <option value="IMT">IMT</option>
+            <option value="DRM">DRM</option>
           </select>
           <select className="input" value={severity} onChange={e => setSeverity(e.target.value as QASeverity | '')}>
             <option value="">All Severities</option>
@@ -220,7 +229,7 @@ const FindingRow: React.FC<{ finding: QAFinding; open: boolean; onToggle: () => 
       <span className="mono-id text-xs shrink-0 w-28">{f.id}</span>
       <SeverityPill severity={f.severity} />
       <span className="text-sm text-content-primary flex-1 min-w-0 truncate">{f.title}</span>
-      <span className={`hidden md:inline text-[10px] px-2 py-0.5 rounded font-semibold shrink-0 ${f.product === 'MSIT' ? 'bg-accent/10 text-accent' : 'bg-oxygene/10 text-oxygene'}`}>
+      <span className={`hidden md:inline text-[10px] px-2 py-0.5 rounded font-semibold shrink-0 ${productBadge[f.product]}`}>
         {f.product}
       </span>
       <span className="hidden lg:flex items-center gap-1 text-[11px] text-content-muted shrink-0">

